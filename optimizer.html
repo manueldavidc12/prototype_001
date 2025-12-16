@@ -9,121 +9,426 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
-    .forecast-layout {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 24px;
+    /* Hero Forecast Banner */
+    .forecast-hero {
+      background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 40px;
+      margin-bottom: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
     }
-    .section-title {
+    .forecast-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .forecast-hero-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94A3B8;
+      margin-bottom: 8px;
+    }
+    .forecast-hero-value {
+      font-size: 56px;
+      font-weight: 800;
+      color: #10B981;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .forecast-hero-change {
       font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
+      color: #10B981;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .forecast-tabs {
+    .forecast-hero-sub {
+      font-size: 14px;
+      color: #94A3B8;
+      margin-top: 4px;
+    }
+    .forecast-hero-right {
+      position: absolute;
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: right;
+    }
+    .growth-control {
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-top: 8px;
+    }
+    .growth-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94A3B8;
+      margin-bottom: 8px;
+    }
+    .growth-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .growth-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+      outline: none;
+    }
+    .growth-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10B981;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .growth-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      min-width: 70px;
+      text-align: right;
+    }
+
+    /* Scenario Buttons */
+    .scenario-buttons {
       display: flex;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-top: 12px;
     }
-    .tab-btn {
+    .scenario-btn {
       flex: 1;
-      padding: 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 500;
+      background: transparent;
+      color: #94A3B8;
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
-    .tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
-    .forecast-panel { display: none; }
-    .forecast-panel.active { display: block; }
-    .forecast-row {
-      display: grid;
-      grid-template-columns: 140px 1fr 100px 120px;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-      gap: 16px;
+    .scenario-btn:hover {
+      border-color: rgba(255,255,255,0.4);
+      color: white;
     }
-    .forecast-row:last-child { border-bottom: none; }
-    .forecast-name { font-weight: 500; font-size: 14px; }
-    .forecast-current { font-size: 12px; color: var(--text-muted); }
-    .forecast-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 14px;
-      text-align: right;
+    .scenario-btn.active {
+      background: #10B981;
+      border-color: #10B981;
+      color: white;
     }
-    .forecast-input:focus { outline: none; border-color: var(--primary); }
-    .forecast-result {
-      text-align: right;
-      font-weight: 600;
-    }
-    .forecast-result.positive { color: var(--secondary); }
-    .forecast-result.negative { color: var(--danger); }
-    .totals-bar {
-      background: var(--bg);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-top: 16px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 24px;
-    }
-    .total-item { text-align: center; }
-    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-    .total-value { font-size: 20px; font-weight: 700; }
-    .results-card {
+    .scenario-btn.active.conservative { background: #3B82F6; border-color: #3B82F6; }
+    .scenario-btn.active.aggressive { background: #F59E0B; border-color: #F59E0B; }
+
+    /* YTD Progress Card */
+    .ytd-card {
       background: var(--bg-card);
       border-radius: var(--radius-lg);
       padding: 24px;
       box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
-    .result-row {
+    .ytd-header {
       display: flex;
       justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .result-row:last-child { border-bottom: none; }
-    .result-label { color: var(--text-muted); font-size: 14px; }
-    .result-value { font-weight: 600; font-size: 16px; }
-    .result-change { font-size: 12px; margin-left: 8px; }
-    .result-change.up { color: var(--secondary); }
-    .result-change.down { color: var(--danger); }
-    .comparison-header {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      align-items: center;
       margin-bottom: 20px;
     }
-    .compare-box {
+    .ytd-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ytd-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .ytd-status.ahead { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+    .ytd-status.on-track { background: rgba(37, 99, 235, 0.1); color: #2563EB; }
+    .ytd-status.behind { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
+
+    .ytd-progress-container {
+      position: relative;
+      height: 32px;
+      background: #E2E8F0;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .ytd-progress-bar {
+      height: 100%;
+      border-radius: 16px;
+      transition: width 0.5s ease;
+    }
+    .ytd-progress-bar.ahead { background: linear-gradient(90deg, #10B981 0%, #34D399 100%); }
+    .ytd-progress-bar.on-track { background: linear-gradient(90deg, #2563EB 0%, #3B82F6 100%); }
+    .ytd-progress-bar.behind { background: linear-gradient(90deg, #EF4444 0%, #F87171 100%); }
+    .ytd-progress-marker {
+      position: absolute;
+      top: -8px;
+      width: 2px;
+      height: 48px;
+      background: #1E293B;
+    }
+    .ytd-progress-marker::after {
+      content: attr(data-label);
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .ytd-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .ytd-stat {
+      text-align: center;
+      padding: 12px;
       background: var(--bg);
       border-radius: var(--radius);
-      padding: 16px;
-      text-align: center;
     }
-    .compare-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-    .compare-value { font-size: 24px; font-weight: 700; }
-    .compare-value.current { color: var(--text-muted); }
-    .compare-value.projected { color: var(--secondary); }
-    .metric-explainer {
-      background: rgba(37, 99, 235, 0.05);
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      font-size: 13px;
+    .ytd-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .ytd-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Forecast Chart */
+    .chart-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-legend {
+      display: flex;
+      gap: 20px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* Scenario Cards */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .scenario-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border-top: 4px solid #3B82F6;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .scenario-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .scenario-card.conservative { border-top-color: #3B82F6; }
+    .scenario-card.expected { border-top-color: #10B981; }
+    .scenario-card.aggressive { border-top-color: #F59E0B; }
+    .scenario-card.active {
+      box-shadow: 0 0 0 2px #10B981, 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .scenario-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .scenario-card-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .scenario-card-rate {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .scenario-card.conservative .scenario-card-rate { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+    .scenario-card.expected .scenario-card-rate { background: rgba(16, 185, 129, 0.1); color: #10B981; }
+    .scenario-card.aggressive .scenario-card-rate { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+    .scenario-card-revenue {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .scenario-card.conservative .scenario-card-revenue { color: #3B82F6; }
+    .scenario-card.expected .scenario-card-revenue { color: #10B981; }
+    .scenario-card.aggressive .scenario-card-revenue { color: #F59E0B; }
+    .scenario-card-sub {
+      font-size: 12px;
       color: var(--text-muted);
       margin-bottom: 16px;
-      border-left: 3px solid var(--primary);
     }
+    .scenario-card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .scenario-stat {
+      padding: 10px;
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+    .scenario-stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .scenario-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Seasonality Insights */
+    .seasonality-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+    .month-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 150px;
+      padding-top: 20px;
+    }
+    .month-bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .month-bar {
+      width: 24px;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s;
+      position: relative;
+    }
+    .month-bar.peak { background: linear-gradient(180deg, #10B981 0%, #34D399 100%); }
+    .month-bar.normal { background: linear-gradient(180deg, #2563EB 0%, #3B82F6 100%); }
+    .month-bar.slow { background: linear-gradient(180deg, #F59E0B 0%, #FBBF24 100%); }
+    .month-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+    .seasonality-insights {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .season-insight {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border-left: 3px solid;
+    }
+    .season-insight.peak {
+      background: rgba(16, 185, 129, 0.05);
+      border-left-color: #10B981;
+    }
+    .season-insight.slow {
+      background: rgba(245, 158, 11, 0.05);
+      border-left-color: #F59E0B;
+    }
+    .season-insight-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .season-insight-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Growth History */
+    .growth-history {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .growth-year {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: var(--radius);
+    }
+    .growth-year-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .growth-year-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .growth-year-change {
+      font-size: 11px;
+      margin-top: 2px;
+    }
+    .growth-year-change.positive { color: #10B981; }
   </style>
 </head>
 <body>
@@ -162,181 +467,214 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">2026 Budget Forecast</h1>
-          <p class="page-subtitle">See projected returns based on your 2025 performance</p>
+      <!-- Hero Forecast Banner -->
+      <div class="forecast-hero">
+        <div class="forecast-hero-label">2026 Projected Revenue</div>
+        <div class="forecast-hero-value" id="heroRevenue">$3.9M</div>
+        <div class="forecast-hero-change">
+          <i class="fas fa-arrow-up"></i>
+          <span id="heroChange">+$414K vs 2025</span>
         </div>
-      </div>
+        <div class="forecast-hero-sub" id="heroSub">Based on 11.8% growth (your 2-year average)</div>
 
-      <div class="metric-explainer">
-        <strong>How this works:</strong> Enter your planned 2026 monthly spend for each location, service, or channel.
-        The projected revenue and CAC are calculated using your actual 2025 ROAS and conversion rates.
-      </div>
-
-      <div class="forecast-layout">
-        <!-- Left Column - Budget Inputs -->
-        <div>
-          <div class="card" style="margin-bottom: 24px;">
-            <div class="section-title">
-              <i class="fas fa-calculator" style="color: var(--primary);"></i>
-              Plan Your 2026 Budget
+        <div class="forecast-hero-right">
+          <div class="growth-control">
+            <div class="growth-label">Adjust Growth Rate</div>
+            <div class="growth-slider-container">
+              <input type="range" class="growth-slider" id="growthSlider" min="0" max="30" value="12" oninput="updateForecast()">
+              <div class="growth-value" id="growthValue">+12%</div>
             </div>
-
-            <div class="forecast-tabs">
-              <button class="tab-btn active" onclick="showPanel('location')">
-                <i class="fas fa-map-marker-alt"></i> By Location
-              </button>
-              <button class="tab-btn" onclick="showPanel('service')">
-                <i class="fas fa-tools"></i> By Service
-              </button>
-              <button class="tab-btn" onclick="showPanel('channel')">
-                <i class="fas fa-bullhorn"></i> By Channel
-              </button>
-            </div>
-
-            <!-- Location Panel -->
-            <div class="forecast-panel active" id="locationPanel">
-              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
-                <div>Location</div>
-                <div>2026 Monthly Spend</div>
-                <div style="text-align: right;">Proj. Revenue</div>
-                <div style="text-align: right;">Proj. CAC</div>
-              </div>
-              <div id="locationInputs"></div>
-            </div>
-
-            <!-- Service Panel -->
-            <div class="forecast-panel" id="servicePanel">
-              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
-                <div>Service</div>
-                <div>2026 Monthly Spend</div>
-                <div style="text-align: right;">Proj. Revenue</div>
-                <div style="text-align: right;">Proj. CAC</div>
-              </div>
-              <div id="serviceInputs"></div>
-            </div>
-
-            <!-- Channel Panel -->
-            <div class="forecast-panel" id="channelPanel">
-              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
-                <div>Channel</div>
-                <div>2026 Monthly Spend</div>
-                <div style="text-align: right;">Proj. Revenue</div>
-                <div style="text-align: right;">Proj. CAC</div>
-              </div>
-              <div id="channelInputs"></div>
-            </div>
-
-            <div class="totals-bar">
-              <div class="total-item">
-                <div class="total-label">Total Monthly Spend</div>
-                <div class="total-value" id="totalSpend">$25,000</div>
-              </div>
-              <div class="total-item">
-                <div class="total-label">Projected Monthly Revenue</div>
-                <div class="total-value" style="color: var(--secondary);" id="totalRevenue">$291,667</div>
-              </div>
-              <div class="total-item">
-                <div class="total-label">Projected ROAS</div>
-                <div class="total-value" id="totalROAS">$11.67</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Chart -->
-          <div class="card">
-            <div class="section-title">
-              <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
-              Projected Revenue by Location
-            </div>
-            <div class="chart-container" style="height: 300px;">
-              <canvas id="forecastChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column - Results -->
-        <div>
-          <!-- 2025 vs 2026 Comparison -->
-          <div class="results-card">
-            <div class="section-title" style="margin-bottom: 16px;">
-              <i class="fas fa-exchange-alt" style="color: var(--primary);"></i>
-              2025 vs 2026 Projection
-            </div>
-
-            <div class="comparison-header">
-              <div class="compare-box">
-                <div class="compare-label">2025 Actual</div>
-                <div class="compare-value current">$3.5M</div>
-              </div>
-              <div class="compare-box">
-                <div class="compare-label">2026 Projected</div>
-                <div class="compare-value projected" id="projectedAnnual">$3.5M</div>
-              </div>
-            </div>
-
-            <div class="result-row">
-              <span class="result-label">Annual Marketing Spend</span>
-              <span class="result-value">
-                <span id="annualSpend">$300,000</span>
-                <span class="result-change" id="spendChange"></span>
-              </span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Projected Annual Revenue</span>
-              <span class="result-value">
-                <span id="annualRevenue">$3,500,000</span>
-                <span class="result-change" id="revenueChange"></span>
-              </span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Projected ROAS</span>
-              <span class="result-value">
-                <span id="projROAS">$11.67</span>
-                <span class="result-change" id="roasChange"></span>
-              </span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Projected CAC</span>
-              <span class="result-value">
-                <span id="projCAC">$500</span>
-                <span class="result-change" id="cacChange"></span>
-              </span>
-            </div>
-            <div class="result-row">
-              <span class="result-label">Projected Customers</span>
-              <span class="result-value">
-                <span id="projCustomers">600</span>
-                <span class="result-change" id="customersChange"></span>
-              </span>
-            </div>
-          </div>
-
-          <!-- Key Insights -->
-          <div class="results-card">
-            <div class="section-title" style="margin-bottom: 16px;">
-              <i class="fas fa-lightbulb" style="color: var(--warning);"></i>
-              Based on 2025 Data
-            </div>
-            <div id="insightsList" style="font-size: 14px; line-height: 1.7;">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <!-- Performance by ROAS -->
-          <div class="results-card">
-            <div class="section-title" style="margin-bottom: 12px;">
-              <i class="fas fa-trophy" style="color: var(--secondary);"></i>
-              Best Performers (2025)
-            </div>
-            <div id="topPerformers" style="font-size: 13px;">
-              <!-- Populated by JS -->
+            <div class="scenario-buttons">
+              <button class="scenario-btn conservative" onclick="setScenario('conservative')">Conservative</button>
+              <button class="scenario-btn active" onclick="setScenario('expected')">Expected</button>
+              <button class="scenario-btn aggressive" onclick="setScenario('aggressive')">Aggressive</button>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- YTD Progress -->
+      <div class="ytd-card">
+        <div class="ytd-header">
+          <div class="ytd-title">
+            <i class="fas fa-chart-line" style="color: var(--primary);"></i>
+            2025 Year-to-Date Progress
+          </div>
+          <div class="ytd-status ahead" id="ytdStatus">
+            <i class="fas fa-arrow-up"></i> Ahead of Pace
+          </div>
+        </div>
+
+        <div class="ytd-progress-container">
+          <div class="ytd-progress-bar ahead" id="ytdProgressBar" style="width: 94%;"></div>
+          <div class="ytd-progress-marker" id="ytdMarker" style="left: 95%;" data-label="Today (Dec 15)"></div>
+        </div>
+
+        <div class="ytd-stats">
+          <div class="ytd-stat">
+            <div class="ytd-stat-value" id="ytdRevenue">$3.3M</div>
+            <div class="ytd-stat-label">YTD Revenue</div>
+          </div>
+          <div class="ytd-stat">
+            <div class="ytd-stat-value" id="ytdTarget">$3.5M</div>
+            <div class="ytd-stat-label">Full Year Target</div>
+          </div>
+          <div class="ytd-stat">
+            <div class="ytd-stat-value" style="color: #10B981;" id="ytdPace">$3.5M</div>
+            <div class="ytd-stat-label">On Pace For</div>
+          </div>
+          <div class="ytd-stat">
+            <div class="ytd-stat-value" id="ytdRemaining">$205K</div>
+            <div class="ytd-stat-label">Remaining (Dec)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scenario Comparison -->
+      <div class="scenario-grid">
+        <div class="scenario-card conservative" onclick="setScenario('conservative')">
+          <div class="scenario-card-header">
+            <div class="scenario-card-title">Conservative</div>
+            <div class="scenario-card-rate">+5%</div>
+          </div>
+          <div class="scenario-card-revenue" id="conservativeRevenue">$3.68M</div>
+          <div class="scenario-card-sub">Maintain current momentum</div>
+          <div class="scenario-card-stats">
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="conservativeCustomers">630</div>
+              <div class="scenario-stat-label">Customers</div>
+            </div>
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="conservativeSpend">$315K</div>
+              <div class="scenario-stat-label">Spend Needed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-card expected active" onclick="setScenario('expected')">
+          <div class="scenario-card-header">
+            <div class="scenario-card-title">Expected</div>
+            <div class="scenario-card-rate">+12%</div>
+          </div>
+          <div class="scenario-card-revenue" id="expectedRevenue">$3.92M</div>
+          <div class="scenario-card-sub">Based on 2-year average growth</div>
+          <div class="scenario-card-stats">
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="expectedCustomers">672</div>
+              <div class="scenario-stat-label">Customers</div>
+            </div>
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="expectedSpend">$336K</div>
+              <div class="scenario-stat-label">Spend Needed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenario-card aggressive" onclick="setScenario('aggressive')">
+          <div class="scenario-card-header">
+            <div class="scenario-card-title">Aggressive</div>
+            <div class="scenario-card-rate">+20%</div>
+          </div>
+          <div class="scenario-card-revenue" id="aggressiveRevenue">$4.20M</div>
+          <div class="scenario-card-sub">Push for market expansion</div>
+          <div class="scenario-card-stats">
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="aggressiveCustomers">720</div>
+              <div class="scenario-stat-label">Customers</div>
+            </div>
+            <div class="scenario-stat">
+              <div class="scenario-stat-value" id="aggressiveSpend">$360K</div>
+              <div class="scenario-stat-label">Spend Needed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Forecast Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fas fa-chart-area" style="color: var(--primary);"></i>
+            Monthly Revenue: 2025 vs 2026 Forecast
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #94A3B8;"></div>
+              2025 Actual
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10B981;"></div>
+              2026 Forecast
+            </div>
+          </div>
+        </div>
+        <div class="chart-container" style="height: 280px;">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Seasonality -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fas fa-sun" style="color: #F59E0B;"></i>
+            Seasonality Pattern
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10B981;"></div>
+              Peak Months
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #2563EB;"></div>
+              Normal
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #F59E0B;"></div>
+              Slower Months
+            </div>
+          </div>
+        </div>
+
+        <div class="seasonality-grid">
+          <div class="month-bars" id="seasonalityBars">
+            <!-- Generated by JS -->
+          </div>
+          <div class="seasonality-insights">
+            <div class="season-insight peak">
+              <div class="season-insight-title">Peak Season: May - June</div>
+              <div class="season-insight-detail">30% above average revenue. Pool season in full swing. Maximize ad spend during this window.</div>
+            </div>
+            <div class="season-insight slow">
+              <div class="season-insight-title">Slower Period: Nov - Dec</div>
+              <div class="season-insight-detail">15% below average. Holiday focus shifts priorities. Consider reducing paid ads, maintain SEO.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="growth-history">
+          <div class="growth-year">
+            <div class="growth-year-label">2023</div>
+            <div class="growth-year-value">$2.8M</div>
+          </div>
+          <div class="growth-year">
+            <div class="growth-year-label">2024</div>
+            <div class="growth-year-value">$3.1M</div>
+            <div class="growth-year-change positive">+10.7%</div>
+          </div>
+          <div class="growth-year">
+            <div class="growth-year-label">2025</div>
+            <div class="growth-year-value">$3.5M</div>
+            <div class="growth-year-change positive">+12.9%</div>
+          </div>
+          <div class="growth-year" style="background: rgba(16, 185, 129, 0.1);">
+            <div class="growth-year-label">2026 Forecast</div>
+            <div class="growth-year-value" style="color: #10B981;" id="historyForecast">$3.9M</div>
+            <div class="growth-year-change positive" id="historyChange">+11.8%</div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -346,244 +684,230 @@
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.plugins.legend.display = false;
 
-    let forecastData = {
-      locations: {},
-      services: {},
-      channels: {}
+    // Base values
+    const base2025Revenue = 3500000;
+    const base2025Spend = 300000;
+    const base2025Customers = 600;
+    const avgJobValue = base2025Revenue / base2025Customers;
+
+    // Scenarios
+    const scenarios = {
+      conservative: { rate: 5, label: 'Conservative' },
+      expected: { rate: 12, label: 'Expected' },
+      aggressive: { rate: 20, label: 'Aggressive' }
     };
+
+    let currentScenario = 'expected';
     let forecastChart = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-      initForecast();
-      renderInputs();
-      renderInsights();
-      renderTopPerformers();
-      updateTotals();
-      renderChart();
+      initScenarios();
+      updateForecast();
+      renderYTDProgress();
+      renderForecastChart();
+      renderSeasonalityBars();
     });
 
-    function initForecast() {
-      // Initialize with current 2025 spend
-      locations.forEach(l => forecastData.locations[l.name] = { spend: l.spend, roas: l.roas, cac: l.cac });
-      services.forEach(s => forecastData.services[s.shortName] = { spend: s.spend, roas: s.roas, cac: s.cac });
-      channels.forEach(c => forecastData.channels[c.name] = { spend: c.spend, roas: c.roas, cac: c.cac });
-    }
+    function initScenarios() {
+      Object.keys(scenarios).forEach(key => {
+        const rate = scenarios[key].rate;
+        const revenue = base2025Revenue * (1 + rate / 100);
+        const customers = Math.round(base2025Customers * (1 + rate / 100));
+        const spend = Math.round(base2025Spend * (1 + rate / 100));
 
-    function renderInputs() {
-      // Location inputs
-      document.getElementById('locationInputs').innerHTML = locations.map(l => `
-        <div class="forecast-row">
-          <div>
-            <div class="forecast-name">${l.name}</div>
-            <div class="forecast-current">2025: ${formatCurrency(l.spend)}/mo</div>
-          </div>
-          <div>
-            <input type="number" class="forecast-input" value="${l.spend}"
-              onchange="updateForecast('locations', '${l.name}', this.value)"
-              placeholder="Monthly spend">
-          </div>
-          <div class="forecast-result positive" id="loc-rev-${l.name.replace(/\s/g, '')}">${formatCurrency(l.revenue)}</div>
-          <div class="forecast-result" id="loc-cac-${l.name.replace(/\s/g, '')}">${formatCAC(l.cac)}</div>
-        </div>
-      `).join('');
-
-      // Service inputs
-      document.getElementById('serviceInputs').innerHTML = services.map(s => `
-        <div class="forecast-row">
-          <div>
-            <div class="forecast-name">${s.shortName}</div>
-            <div class="forecast-current">2025: ${formatCurrency(s.spend)}/mo</div>
-          </div>
-          <div>
-            <input type="number" class="forecast-input" value="${s.spend}"
-              onchange="updateForecast('services', '${s.shortName}', this.value)"
-              placeholder="Monthly spend">
-          </div>
-          <div class="forecast-result positive" id="svc-rev-${s.shortName.replace(/\s/g, '')}">${formatCurrency(s.revenue)}</div>
-          <div class="forecast-result" id="svc-cac-${s.shortName.replace(/\s/g, '')}">${formatCAC(s.cac)}</div>
-        </div>
-      `).join('');
-
-      // Channel inputs
-      document.getElementById('channelInputs').innerHTML = channels.map(c => `
-        <div class="forecast-row">
-          <div>
-            <div class="forecast-name">${c.name}</div>
-            <div class="forecast-current">2025: ${formatCurrency(c.spend)}/mo</div>
-          </div>
-          <div>
-            <input type="number" class="forecast-input" value="${c.spend}"
-              onchange="updateForecast('channels', '${c.name}', this.value)"
-              placeholder="Monthly spend">
-          </div>
-          <div class="forecast-result positive" id="ch-rev-${c.name.replace(/\s/g, '')}">${formatCurrency(c.revenue)}</div>
-          <div class="forecast-result" id="ch-cac-${c.name.replace(/\s/g, '')}">${formatCAC(c.cac)}</div>
-        </div>
-      `).join('');
-    }
-
-    function updateForecast(type, name, value) {
-      const spend = parseInt(value) || 0;
-      forecastData[type][name].spend = spend;
-
-      // Calculate projected revenue based on 2025 ROAS
-      const roas = forecastData[type][name].roas;
-      const projRevenue = spend * roas;
-
-      // Update display
-      const prefix = type === 'locations' ? 'loc' : type === 'services' ? 'svc' : 'ch';
-      const safeName = name.replace(/\s/g, '');
-      document.getElementById(`${prefix}-rev-${safeName}`).textContent = formatCurrency(projRevenue);
-
-      updateTotals();
-      renderChart();
-    }
-
-    function updateTotals() {
-      // Calculate totals from location data (primary)
-      let totalSpend = 0;
-      let totalRevenue = 0;
-
-      Object.keys(forecastData.locations).forEach(name => {
-        const data = forecastData.locations[name];
-        totalSpend += data.spend;
-        totalRevenue += data.spend * data.roas;
+        document.getElementById(`${key}Revenue`).textContent = formatCurrency(revenue);
+        document.getElementById(`${key}Customers`).textContent = customers;
+        document.getElementById(`${key}Spend`).textContent = formatCurrency(spend);
       });
-
-      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
-      const annualSpend = totalSpend * 12;
-      const annualRevenue = totalRevenue * 12;
-      const projCustomers = Math.round(annualSpend / companyData.cac);
-      const projCAC = projCustomers > 0 ? annualSpend / projCustomers : 0;
-
-      // Update displays
-      document.getElementById('totalSpend').textContent = formatCurrency(totalSpend);
-      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
-      document.getElementById('totalROAS').textContent = formatROAS(roas);
-
-      document.getElementById('annualSpend').textContent = formatCurrencyFull(annualSpend);
-      document.getElementById('annualRevenue').textContent = formatCurrencyFull(annualRevenue);
-      document.getElementById('projectedAnnual').textContent = formatCurrency(annualRevenue);
-      document.getElementById('projROAS').textContent = formatROAS(roas);
-      document.getElementById('projCAC').textContent = formatCAC(projCAC);
-      document.getElementById('projCustomers').textContent = formatNumber(projCustomers);
-
-      // Calculate changes vs 2025
-      const baseSpend = companyData.annual.spend;
-      const baseRevenue = companyData.annual.revenue;
-      const baseROAS = companyData.roas;
-      const baseCAC = companyData.cac;
-      const baseCustomers = companyData.annual.customers;
-
-      updateChange('spendChange', annualSpend, baseSpend, true);
-      updateChange('revenueChange', annualRevenue, baseRevenue, false);
-      updateChange('roasChange', roas, baseROAS, false);
-      updateChange('cacChange', projCAC, baseCAC, true);
-      updateChange('customersChange', projCustomers, baseCustomers, false);
     }
 
-    function updateChange(elementId, newVal, oldVal, lowerIsBetter) {
-      const pctChange = ((newVal - oldVal) / oldVal * 100);
-      const el = document.getElementById(elementId);
+    function setScenario(scenario) {
+      currentScenario = scenario;
+      const rate = scenarios[scenario].rate;
 
-      if (Math.abs(pctChange) < 0.5) {
-        el.textContent = '';
-        return;
-      }
+      // Update slider
+      document.getElementById('growthSlider').value = rate;
 
-      const isUp = pctChange > 0;
-      const isGood = lowerIsBetter ? !isUp : isUp;
+      // Update buttons
+      document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.scenario-btn.${scenario}`).classList.add('active');
 
-      el.textContent = (isUp ? '+' : '') + pctChange.toFixed(1) + '%';
-      el.className = 'result-change ' + (isGood ? 'up' : 'down');
+      // Update cards
+      document.querySelectorAll('.scenario-card').forEach(card => card.classList.remove('active'));
+      document.querySelector(`.scenario-card.${scenario}`).classList.add('active');
+
+      updateForecast();
     }
 
-    function showPanel(panel) {
-      document.querySelectorAll('.forecast-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(panel + 'Panel').classList.add('active');
-      event.target.classList.add('active');
-    }
+    function updateForecast() {
+      const rate = parseInt(document.getElementById('growthSlider').value);
+      const revenue = base2025Revenue * (1 + rate / 100);
+      const change = revenue - base2025Revenue;
 
-    function renderInsights() {
-      const bestLoc = getLocationsByROAS()[0];
-      const worstLoc = getLocationsByROAS().slice(-1)[0];
-      const bestSvc = getServicesByROAS()[0];
+      // Update hero
+      document.getElementById('growthValue').textContent = `+${rate}%`;
+      document.getElementById('heroRevenue').textContent = formatCurrency(revenue);
+      document.getElementById('heroChange').textContent = `+${formatCurrency(change)} vs 2025`;
 
-      document.getElementById('insightsList').innerHTML = `
-        <p style="margin-bottom: 12px;">
-          <strong>${bestLoc.name}</strong> has your best ROAS at <strong>${formatROAS(bestLoc.roas)}</strong>.
-          Every $1 spent there returns $${bestLoc.roas.toFixed(2)}.
-        </p>
-        <p style="margin-bottom: 12px;">
-          <strong>${worstLoc.name}</strong> has the lowest ROAS at <strong>${formatROAS(worstLoc.roas)}</strong>.
-          Consider reallocating some budget to higher-performing areas.
-        </p>
-        <p>
-          <strong>${bestSvc.shortName}</strong> generates ${formatCurrency(bestSvc.revenue)}/month
-          with a CAC of ${formatCAC(bestSvc.cac)}.
-        </p>
-      `;
-    }
+      // Update hero subtitle
+      let subText = '';
+      if (rate <= 5) subText = 'Conservative growth scenario';
+      else if (rate <= 15) subText = 'Based on your 2-year average growth pattern';
+      else subText = 'Aggressive growth - requires increased investment';
+      document.getElementById('heroSub').textContent = subText;
 
-    function renderTopPerformers() {
-      const top5 = getLocationsByROAS().slice(0, 5);
-      document.getElementById('topPerformers').innerHTML = top5.map((l, i) => `
-        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
-          <span>${i + 1}. ${l.name}</span>
-          <span style="font-weight: 600; color: var(--secondary);">${formatROAS(l.roas)} ROAS</span>
-        </div>
-      `).join('');
-    }
+      // Update history
+      document.getElementById('historyForecast').textContent = formatCurrency(revenue);
+      document.getElementById('historyChange').textContent = `+${rate}%`;
 
-    function renderChart() {
-      const ctx = document.getElementById('forecastChart').getContext('2d');
-
-      // Calculate projected revenues
-      const chartData = locations.map(l => ({
-        name: l.name,
-        revenue: forecastData.locations[l.name].spend * forecastData.locations[l.name].roas
-      })).sort((a, b) => b.revenue - a.revenue);
-
+      // Update chart
       if (forecastChart) {
-        forecastChart.destroy();
+        updateChartData(rate);
       }
+
+      // Update scenario button states
+      document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+      if (rate <= 6) {
+        document.querySelector('.scenario-btn.conservative').classList.add('active');
+      } else if (rate <= 15) {
+        document.querySelector('.scenario-btn.active')?.classList.remove('active');
+        document.querySelectorAll('.scenario-btn')[1].classList.add('active');
+      } else {
+        document.querySelector('.scenario-btn.aggressive').classList.add('active');
+      }
+    }
+
+    function renderYTDProgress() {
+      // Calculate YTD based on Jan-Nov 2025 data
+      const ytdData = monthlyDataByYear[2025].slice(0, 11); // Jan-Nov
+      const ytdRevenue = ytdData.reduce((sum, m) => sum + m.revenue, 0);
+      const fullYearTarget = base2025Revenue;
+      const decemberProjected = monthlyDataByYear[2025][11].revenue;
+
+      // Calculate pace (annualized from 11 months)
+      const daysElapsed = 349; // Dec 15
+      const daysInYear = 365;
+      const paceRevenue = (ytdRevenue / daysElapsed) * daysInYear;
+
+      // Determine status
+      const progressPct = (ytdRevenue / fullYearTarget) * 100;
+      const expectedPct = (daysElapsed / daysInYear) * 100;
+
+      let status = 'on-track';
+      let statusText = 'On Track';
+      if (progressPct > expectedPct + 2) {
+        status = 'ahead';
+        statusText = 'Ahead of Pace';
+      } else if (progressPct < expectedPct - 2) {
+        status = 'behind';
+        statusText = 'Behind Pace';
+      }
+
+      // Update UI
+      document.getElementById('ytdRevenue').textContent = formatCurrency(ytdRevenue);
+      document.getElementById('ytdTarget').textContent = formatCurrency(fullYearTarget);
+      document.getElementById('ytdPace').textContent = formatCurrency(ytdRevenue + decemberProjected);
+      document.getElementById('ytdRemaining').textContent = formatCurrency(decemberProjected);
+
+      const progressBar = document.getElementById('ytdProgressBar');
+      progressBar.style.width = `${Math.min(progressPct, 100)}%`;
+      progressBar.className = `ytd-progress-bar ${status}`;
+
+      const statusEl = document.getElementById('ytdStatus');
+      statusEl.className = `ytd-status ${status}`;
+      statusEl.innerHTML = `<i class="fas fa-arrow-${status === 'behind' ? 'down' : 'up'}"></i> ${statusText}`;
+
+      // Position marker
+      document.getElementById('ytdMarker').style.left = `${expectedPct}%`;
+    }
+
+    function renderForecastChart() {
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const data2025 = monthlyDataByYear[2025].map(m => m.revenue);
+      const rate = parseInt(document.getElementById('growthSlider').value);
+      const data2026 = data2025.map(v => v * (1 + rate / 100));
 
       forecastChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: chartData.map(d => d.name),
-          datasets: [{
-            data: chartData.map(d => d.revenue),
-            backgroundColor: '#2563EB',
-            borderRadius: 4
-          }]
+          labels: months,
+          datasets: [
+            {
+              label: '2025',
+              data: data2025,
+              backgroundColor: '#94A3B8',
+              borderRadius: 4,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            },
+            {
+              label: '2026',
+              data: data2026,
+              backgroundColor: '#10B981',
+              borderRadius: 4,
+              barPercentage: 0.6,
+              categoryPercentage: 0.8
+            }
+          ]
         },
         options: {
-          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
             datalabels: {
-              formatter: (value) => formatCurrency(value),
-              color: '#1E293B',
-              anchor: 'end',
-              align: 'right',
-              offset: 4,
-              font: { weight: 'bold', size: 11 }
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + formatCurrency(context.raw);
+                }
+              }
             }
           },
           scales: {
             x: {
-              display: false,
-              max: Math.max(...chartData.map(d => d.revenue)) * 1.4
+              grid: { display: false }
             },
             y: {
-              grid: { display: false }
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatCurrency(value);
+                }
+              }
             }
           }
         }
       });
+    }
+
+    function updateChartData(rate) {
+      const data2025 = monthlyDataByYear[2025].map(m => m.revenue);
+      const data2026 = data2025.map(v => v * (1 + rate / 100));
+      forecastChart.data.datasets[1].data = data2026;
+      forecastChart.update();
+    }
+
+    function renderSeasonalityBars() {
+      const data = monthlyDataByYear[2025];
+      const avgRevenue = data.reduce((sum, m) => sum + m.revenue, 0) / 12;
+      const maxRevenue = Math.max(...data.map(m => m.revenue));
+
+      document.getElementById('seasonalityBars').innerHTML = data.map(m => {
+        const heightPct = (m.revenue / maxRevenue) * 100;
+        let barClass = 'normal';
+        if (m.revenue > avgRevenue * 1.15) barClass = 'peak';
+        else if (m.revenue < avgRevenue * 0.9) barClass = 'slow';
+
+        return `
+          <div class="month-bar-container">
+            <div class="month-bar ${barClass}" style="height: ${heightPct}%;"></div>
+            <div class="month-label">${m.month}</div>
+          </div>
+        `;
+      }).join('');
     }
   </script>
 </body>
