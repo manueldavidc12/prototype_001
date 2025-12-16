@@ -9,7 +9,102 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
-    /* Minimal overrides for cleaner look */
+    /* Hero Banner */
+    .page-hero {
+      background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 40px;
+      margin-bottom: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-hero-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .page-hero-subtitle {
+      font-size: 15px;
+      color: #94A3B8;
+    }
+    .page-hero-right {
+      position: absolute;
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .live-dot-hero {
+      width: 8px;
+      height: 8px;
+      background: #10B981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .live-text-hero {
+      font-size: 12px;
+      color: #94A3B8;
+    }
+
+    /* Chart Cards */
+    .chart-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .chart-card.invest { border-top: 4px solid var(--secondary); }
+    .chart-card.review { border-top: 4px solid var(--danger); }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    /* Metric boxes */
     .big-number { font-size: 42px; font-weight: 700; line-height: 1; }
     .big-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
     .metric-box {
@@ -261,15 +356,13 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
-      <div class="page-header">
-        <div>
-          <h1 class="page-title" id="headerTitle">Where Should You Spend Your Next Dollar?</h1>
-          <p class="page-subtitle" id="headerSubtitle">Based on your 2025 performance data</p>
-        </div>
-        <div class="last-updated">
-          <div class="live-dot"></div>
-          Updated today
+      <!-- Hero Banner -->
+      <div class="page-hero">
+        <div class="page-hero-title" id="headerTitle">Where Should You Spend Your Next Dollar?</div>
+        <div class="page-hero-subtitle" id="headerSubtitle">Based on your 2025 performance data</div>
+        <div class="page-hero-right">
+          <div class="live-dot-hero"></div>
+          <span class="live-text-hero">Updated today</span>
         </div>
       </div>
 
@@ -355,68 +448,146 @@
       <!-- WHERE TO INVEST MORE vs WHERE TO CUT -->
       <div class="grid-2" style="margin-bottom: 24px;">
         <!-- Best Performing -->
-        <div class="card" style="border-top: 4px solid var(--secondary);">
-          <div class="section-title">
-            <i class="fas fa-arrow-up" style="color: var(--secondary);"></i>
-            Invest More Here
+        <div class="chart-card invest">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">
+                <i class="fas fa-arrow-up" style="color: var(--secondary);"></i>
+                Invest More Here
+              </div>
+              <div class="chart-subtitle">Best return for every dollar spent</div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #10B981;"></div>
+                Top 5 Locations
+              </div>
+            </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-            These areas give you the best return for every dollar spent
-          </p>
-          <div class="chart-container" style="height: 220px;">
+          <div class="chart-container" style="height: 200px;">
             <canvas id="bestPerformersChart"></canvas>
           </div>
         </div>
 
         <!-- Underperforming -->
-        <div class="card" style="border-top: 4px solid var(--danger);">
-          <div class="section-title">
-            <i class="fas fa-arrow-down" style="color: var(--danger);"></i>
-            Review These Areas
+        <div class="chart-card review">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">
+                <i class="fas fa-arrow-down" style="color: var(--danger);"></i>
+                Review These Areas
+              </div>
+              <div class="chart-subtitle">Higher than average cost per customer</div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #EF4444;"></div>
+                Above Avg
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F59E0B;"></div>
+                Near Avg
+              </div>
+            </div>
           </div>
-          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-            Spending more than average to get each customer here
-          </p>
-          <div class="chart-container" style="height: 220px;">
+          <div class="chart-container" style="height: 200px;">
             <canvas id="underperformersChart"></canvas>
           </div>
         </div>
       </div>
 
       <!-- REVENUE BY SERVICE -->
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="section-title">
-          <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
-          Revenue by Service (Monthly)
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">
+              <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+              Revenue by Service
+            </div>
+            <div class="chart-subtitle">Monthly revenue and ROAS by service line</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10B981;"></div>
+              Pool & Spa
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #2563EB;"></div>
+              Pool Cages
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #F59E0B;"></div>
+              Resurfacing
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #8B5CF6;"></div>
+              Outdoor Kitchens
+            </div>
+          </div>
         </div>
-        <div class="chart-container" style="height: 200px;">
+        <div class="chart-container" style="height: 180px;">
           <canvas id="serviceRevenueChart"></canvas>
         </div>
       </div>
 
       <!-- CHANNEL COMPARISON -->
       <div class="grid-2" style="margin-bottom: 24px;">
-        <div class="card">
-          <div class="section-title">
-            <i class="fas fa-search" style="color: var(--primary);"></i>
-            SEO Performance
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <i class="fas fa-search" style="color: var(--primary);"></i>
+              SEO Performance
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #2563EB;"></div>
+                Organic
+              </div>
+            </div>
           </div>
           <div id="seoStats"></div>
         </div>
-        <div class="card">
-          <div class="section-title">
-            <i class="fas fa-bullseye" style="color: var(--warning);"></i>
-            Paid Ads Performance
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <i class="fas fa-bullseye" style="color: var(--warning);"></i>
+              Paid Ads Performance
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F59E0B;"></div>
+                Paid
+              </div>
+            </div>
           </div>
           <div id="paidStats"></div>
         </div>
       </div>
 
       <!-- TREND OVER TIME -->
-      <div class="card">
-        <div class="section-title">
-          <i class="fas fa-chart-line" style="color: var(--primary);"></i>
-          <span id="trendChartTitle">Monthly Revenue</span>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">
+              <i class="fas fa-chart-line" style="color: var(--primary);"></i>
+              <span id="trendChartTitle">Monthly Revenue</span>
+            </div>
+            <div class="chart-subtitle">Revenue performance by month</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10B981;"></div>
+              Strong
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #2563EB;"></div>
+              Normal
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #EF4444;"></div>
+              Slow
+            </div>
+          </div>
         </div>
         <div class="chart-container" style="height: 250px;">
           <canvas id="monthlyTrendChart"></canvas>

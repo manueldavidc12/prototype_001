@@ -9,6 +9,79 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <style>
+    /* Hero Banner */
+    .page-hero {
+      background: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 40px;
+      margin-bottom: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .page-hero-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .page-hero-subtitle {
+      font-size: 15px;
+      color: #94A3B8;
+    }
+
+    /* Chart Cards */
+    .chart-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .chart-legend {
+      display: flex;
+      gap: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
     .filter-bar {
       background: var(--bg-card);
       border-radius: var(--radius-lg);
@@ -227,12 +300,10 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Performance Analysis</h1>
-          <p class="page-subtitle">Filter by location, service, and channel to find what works best</p>
-        </div>
+      <!-- Hero Banner -->
+      <div class="page-hero">
+        <div class="page-hero-title">Performance Analysis</div>
+        <div class="page-hero-subtitle">Filter by location, service, and channel to find what works best</div>
       </div>
 
       <!-- Filter Bar -->
@@ -298,10 +369,22 @@
       <!-- Breakdown Tables -->
       <div class="comparison-row">
         <!-- By Location -->
-        <div class="card">
-          <div class="section-title">
-            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-            Breakdown by Location
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+              Breakdown by Location
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #10B981;"></div>
+                Above Avg
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F59E0B;"></div>
+                Below Avg
+              </div>
+            </div>
           </div>
           <table class="breakdown-table" id="locationTable">
             <thead>
@@ -317,10 +400,22 @@
         </div>
 
         <!-- By Service -->
-        <div class="card">
-          <div class="section-title">
-            <i class="fas fa-tools" style="color: var(--secondary);"></i>
-            Breakdown by Service
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <i class="fas fa-tools" style="color: var(--secondary);"></i>
+              Breakdown by Service
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #10B981;"></div>
+                Above Avg
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F59E0B;"></div>
+                Below Avg
+              </div>
+            </div>
           </div>
           <table class="breakdown-table" id="serviceTable">
             <thead>
@@ -337,10 +432,22 @@
       </div>
 
       <!-- Channel Breakdown -->
-      <div class="card" style="margin-bottom: 24px;">
-        <div class="section-title">
-          <i class="fas fa-bullhorn" style="color: var(--warning);"></i>
-          Breakdown by Channel
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <i class="fas fa-bullhorn" style="color: var(--warning);"></i>
+            Breakdown by Channel
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #2563EB;"></div>
+              SEO
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #F59E0B;"></div>
+              Paid Ads
+            </div>
+          </div>
         </div>
         <table class="breakdown-table" id="channelTable">
           <thead>
@@ -359,14 +466,26 @@
       </div>
 
       <!-- Best Combinations -->
-      <div class="card">
-        <div class="section-title">
-          <i class="fas fa-trophy" style="color: var(--warning);"></i>
-          Top Performing Combinations
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">
+              <i class="fas fa-trophy" style="color: var(--warning);"></i>
+              Top Performing Combinations
+            </div>
+            <div class="chart-subtitle">Estimated ROAS for location + service + channel combinations</div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10B981;"></div>
+              Increase Budget
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #64748B;"></div>
+              Maintain
+            </div>
+          </div>
         </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-          Based on estimated ROAS for each location + service + channel combination
-        </p>
         <table class="breakdown-table">
           <thead>
             <tr>
