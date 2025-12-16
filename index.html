@@ -150,6 +150,70 @@
       font-size: 11px;
       font-weight: 600;
     }
+
+    /* Sidebar Weekly Insights */
+    .sidebar-insights {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      flex: 1;
+      overflow-y: auto;
+    }
+    .sidebar-insights-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .sidebar-insights-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sidebar-insights-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .sidebar-insight-item {
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: var(--radius);
+      border-left: 3px solid var(--primary);
+      background: rgba(37, 99, 235, 0.03);
+    }
+    .sidebar-insight-item.opportunity {
+      border-left-color: #10B981;
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .sidebar-insight-item.warning {
+      border-left-color: #F59E0B;
+      background: rgba(245, 158, 11, 0.05);
+    }
+    .sidebar-insight-item.info {
+      border-left-color: #2563EB;
+      background: rgba(37, 99, 235, 0.05);
+    }
+    .sidebar-insight-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .sidebar-insight-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .sidebar-insight-action {
+      font-size: 10px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -183,6 +247,15 @@
           <span class="ai-status-title">Connected</span>
         </div>
         <div class="ai-status-text">Data syncs daily</div>
+      </div>
+
+      <!-- Weekly Insights in Sidebar -->
+      <div class="sidebar-insights">
+        <div class="sidebar-insights-header">
+          <span class="sidebar-insights-title">Weekly Report</span>
+          <span class="sidebar-insights-date" id="sidebarWeekDate">Dec 15</span>
+        </div>
+        <div id="sidebarInsightsList"></div>
       </div>
     </aside>
 
@@ -277,18 +350,6 @@
           <div class="big-number" id="totalCAC">$500</div>
           <div class="big-label">Cost per Customer</div>
         </div>
-      </div>
-
-      <!-- WEEKLY INSIGHTS -->
-      <div class="card" style="border-left: 4px solid var(--primary); margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <div class="section-title" style="margin-bottom: 0;">
-            <i class="fas fa-calendar-week"></i>
-            Weekly Report
-          </div>
-          <span style="font-size: 13px; color: var(--text-muted);" id="weekDate">Week of Dec 15, 2025</span>
-        </div>
-        <div id="weeklyInsightsList"></div>
       </div>
 
       <!-- WHERE TO INVEST MORE vs WHERE TO CUT -->
@@ -511,25 +572,16 @@
 
     function renderWeeklyInsights() {
       const week = getCurrentWeekInsights();
-      document.getElementById('weekDate').textContent = 'Week of ' + week.week;
+      // Update sidebar date
+      document.getElementById('sidebarWeekDate').textContent = week.week.replace(', 2025', '');
 
-      const styles = {
-        opportunity: { border: '#10B981', bg: 'rgba(16, 185, 129, 0.05)' },
-        warning: { border: '#F59E0B', bg: 'rgba(245, 158, 11, 0.05)' },
-        info: { border: '#2563EB', bg: 'rgba(37, 99, 235, 0.05)' }
-      };
-
-      document.getElementById('weeklyInsightsList').innerHTML = week.insights.map(insight => `
-        <div style="background: ${styles[insight.type].bg}; border-left: 3px solid ${styles[insight.type].border}; border-radius: 4px; padding: 14px 16px; margin-bottom: 10px;">
-          <div style="font-weight: 600; margin-bottom: 6px; color: var(--text);">${insight.title}</div>
-          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">${insight.detail}</div>
-          <div style="display: flex; gap: 16px; font-size: 12px;">
-            <span style="color: var(--primary);">
-              <i class="fas fa-arrow-right"></i> ${insight.action}
-            </span>
-            <span style="color: var(--text-muted);">
-              ${insight.impact}
-            </span>
+      // Render insights in sidebar
+      document.getElementById('sidebarInsightsList').innerHTML = week.insights.map(insight => `
+        <div class="sidebar-insight-item ${insight.type}">
+          <div class="sidebar-insight-title">${insight.title}</div>
+          <div class="sidebar-insight-detail">${insight.detail}</div>
+          <div class="sidebar-insight-action">
+            <i class="fas fa-arrow-right"></i> ${insight.action}
           </div>
         </div>
       `).join('');
