@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services | Creative Outdoor Florida</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .big-number { font-size: 42px; font-weight: 700; line-height: 1; }
+    .big-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    .metric-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .highlight-green { color: var(--secondary); }
+    .highlight-blue { color: var(--primary); }
+    .highlight-red { color: var(--danger); }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .last-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .service-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+    .service-card.best { border-left-color: var(--secondary); }
+    .service-name { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+    .service-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .service-stat-value { font-size: 24px; font-weight: 700; }
+    .service-stat-label { font-size: 12px; color: var(--text-muted); }
+    .simple-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .simple-stat:last-child { border-bottom: none; }
+    .stat-label { font-size: 14px; }
+    .stat-value { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>Creative Outdoor</h1>
+        <span>Marketing Dashboard</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Views</div>
+        <a href="index.html" class="nav-link">
+          <i class="fas fa-home"></i>
+          Overview
+        </a>
+        <a href="locations.html" class="nav-link">
+          <i class="fas fa-map-marker-alt"></i>
+          By Location
+        </a>
+        <a href="services.html" class="nav-link active">
+          <i class="fas fa-tools"></i>
+          By Service
+        </a>
+        <a href="channels.html" class="nav-link">
+          <i class="fas fa-bullhorn"></i>
+          By Channel
+        </a>
+        <a href="analysis.html" class="nav-link">
+          <i class="fas fa-filter"></i>
+          Analysis
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Planning</div>
+        <a href="optimizer.html" class="nav-link">
+          <i class="fas fa-sliders-h"></i>
+          2026 Planner
+        </a>
+      </nav>
+
+      <div class="ai-status">
+        <div class="ai-status-header">
+          <div class="ai-status-dot"></div>
+          <span class="ai-status-title">Connected</span>
+        </div>
+        <div class="ai-status-text">Data syncs daily</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Service Performance</h1>
+          <p class="page-subtitle">Which services generate the most return?</p>
+        </div>
+        <div class="last-updated">
+          <div class="live-dot"></div>
+          Monthly data
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="grid-4" style="margin-bottom: 24px;">
+        <div class="metric-box">
+          <div class="big-number highlight-blue">4</div>
+          <div class="big-label">Service Lines</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number highlight-green" id="totalRevenue">$292K</div>
+          <div class="big-label">Monthly Revenue</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number" id="totalSpend">$25K</div>
+          <div class="big-label">Monthly Spend</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number highlight-green" id="avgROAS">$11.67</div>
+          <div class="big-label">Avg. Return per $1</div>
+        </div>
+      </div>
+
+      <!-- Service Cards -->
+      <div class="grid-2" style="margin-bottom: 24px;" id="serviceCards">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Revenue Comparison -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+          <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+          Revenue by Service (Monthly)
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Color shows efficiency: Green = high ROAS, Blue = average, Red = needs review
+        </p>
+        <div class="chart-container" style="height: 200px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <!-- ROAS Comparison -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+          <i class="fas fa-dollar-sign" style="color: var(--secondary);"></i>
+          Return on Ad Spend by Service
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Dollars returned for every $1 spent on marketing
+        </p>
+        <div class="chart-container" style="height: 200px;">
+          <canvas id="roasChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Spend vs Revenue -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-pie-chart" style="color: var(--primary);"></i>
+            Marketing Spend Allocation
+          </div>
+          <div class="chart-container" style="height: 220px;">
+            <canvas id="spendChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-coins" style="color: var(--secondary);"></i>
+            Revenue Distribution
+          </div>
+          <div class="chart-container" style="height: 220px;">
+            <canvas id="revenueDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.plugins.legend.display = false;
+
+    const serviceColors = ['#10B981', '#2563EB', '#F59E0B', '#8B5CF6'];
+    const serviceIcons = ['fa-swimming-pool', 'fa-border-all', 'fa-paint-roller', 'fa-utensils'];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderSummary();
+      renderServiceCards();
+      renderRevenueChart();
+      renderROASChart();
+      renderSpendChart();
+      renderRevenueDistChart();
+    });
+
+    function renderSummary() {
+      const totalRevenue = services.reduce((sum, s) => sum + s.revenue, 0);
+      const totalSpend = services.reduce((sum, s) => sum + s.spend, 0);
+      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('totalSpend').textContent = formatCurrency(totalSpend);
+      document.getElementById('avgROAS').textContent = formatROAS(companyData.roas);
+    }
+
+    function renderServiceCards() {
+      const sorted = getServicesByROAS();
+      const totalRevenue = services.reduce((sum, s) => sum + s.revenue, 0);
+      const totalSpend = services.reduce((sum, s) => sum + s.spend, 0);
+
+      document.getElementById('serviceCards').innerHTML = sorted.map((svc, i) => {
+        const revenueShare = (svc.revenue / totalRevenue * 100).toFixed(0);
+        const spendShare = (svc.spend / totalSpend * 100).toFixed(0);
+        const isBest = i === 0;
+
+        return `
+          <div class="service-card ${isBest ? 'best' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div class="service-name">
+                <i class="fas ${serviceIcons[services.indexOf(svc)]}" style="color: ${serviceColors[i]}; margin-right: 8px;"></i>
+                ${svc.shortName}
+              </div>
+              ${isBest ? '<span style="background: var(--secondary); color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">Top Performer</span>' : ''}
+            </div>
+            <div class="service-stats">
+              <div>
+                <div class="service-stat-value highlight-green">${formatCurrency(svc.revenue)}</div>
+                <div class="service-stat-label">Monthly Revenue (${revenueShare}%)</div>
+              </div>
+              <div>
+                <div class="service-stat-value">${formatCurrency(svc.spend)}</div>
+                <div class="service-stat-label">Monthly Spend (${spendShare}%)</div>
+              </div>
+              <div>
+                <div class="service-stat-value highlight-green">${formatROAS(svc.roas)}</div>
+                <div class="service-stat-label">Return per $1</div>
+              </div>
+              <div>
+                <div class="service-stat-value">${formatCAC(svc.cac)}</div>
+                <div class="service-stat-label">Cost per Customer</div>
+              </div>
+            </div>
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; gap: 24px; font-size: 13px;">
+              <div><strong>${svc.customers}</strong> customers/month</div>
+              <div><strong>${svc.leads}</strong> leads/month</div>
+              <div><strong>${svc.convRate.toFixed(0)}%</strong> conversion rate</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRevenueChart() {
+      const sorted = getServicesByROAS();
+      const avgROAS = companyData.roas;
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(s => s.shortName),
+          datasets: [{
+            data: sorted.map(s => s.revenue),
+            backgroundColor: sorted.map((s, i) => serviceColors[i]),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value, context) => {
+                const svc = sorted[context.dataIndex];
+                return formatCurrency(value) + ' revenue';
+              },
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...sorted.map(s => s.revenue)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderROASChart() {
+      const sorted = getServicesByROAS();
+      const ctx = document.getElementById('roasChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(s => s.shortName),
+          datasets: [{
+            data: sorted.map(s => s.roas),
+            backgroundColor: sorted.map((s, i) => serviceColors[i]),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => '$' + value.toFixed(2) + ' return per $1',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...sorted.map(s => s.roas)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSpendChart() {
+      const totalSpend = services.reduce((sum, s) => sum + s.spend, 0);
+      const ctx = document.getElementById('spendChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: services.map(s => s.shortName),
+          datasets: [{
+            data: services.map(s => s.spend),
+            backgroundColor: serviceColors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => {
+                const pct = (value / totalSpend * 100).toFixed(0);
+                return formatCurrency(value) + ' (' + pct + '%)';
+              },
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 11 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...services.map(s => s.spend)) * 1.6
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRevenueDistChart() {
+      const totalRevenue = services.reduce((sum, s) => sum + s.revenue, 0);
+      const ctx = document.getElementById('revenueDistChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: services.map(s => s.shortName),
+          datasets: [{
+            data: services.map(s => s.revenue),
+            backgroundColor: serviceColors,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => {
+                const pct = (value / totalRevenue * 100).toFixed(0);
+                return formatCurrency(value) + ' (' + pct + '%)';
+              },
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 11 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...services.map(s => s.revenue)) * 1.5
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

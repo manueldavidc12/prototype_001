@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis | Creative Outdoor Florida</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .filter-bar {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .filter-group {
+      flex: 1;
+    }
+    .filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .filter-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .reset-btn {
+      padding: 12px 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .reset-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .results-summary {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .summary-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .summary-filters {
+      display: flex;
+      gap: 8px;
+    }
+    .filter-tag {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .filter-tag.secondary {
+      background: var(--secondary);
+    }
+    .filter-tag.warning {
+      background: var(--warning);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+    }
+    .metric-item {
+      text-align: center;
+    }
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .metric-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .metric-value.good { color: var(--secondary); }
+    .metric-value.warning { color: var(--warning); }
+    .metric-value.bad { color: var(--danger); }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .breakdown-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--border);
+    }
+    .breakdown-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .breakdown-table tr:hover {
+      background: var(--bg);
+    }
+    .breakdown-table .name-cell {
+      font-weight: 600;
+    }
+    .roas-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .roas-bar-track {
+      flex: 1;
+      height: 8px;
+      background: #E2E8F0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .roas-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .roas-value {
+      font-weight: 600;
+      min-width: 60px;
+      text-align: right;
+    }
+    .no-data {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-muted);
+    }
+    .comparison-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .insight-box {
+      background: rgba(37, 99, 235, 0.05);
+      border-left: 3px solid var(--primary);
+      border-radius: 4px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>Creative Outdoor</h1>
+        <span>Marketing Dashboard</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Views</div>
+        <a href="index.html" class="nav-link">
+          <i class="fas fa-home"></i>
+          Overview
+        </a>
+        <a href="locations.html" class="nav-link">
+          <i class="fas fa-map-marker-alt"></i>
+          By Location
+        </a>
+        <a href="services.html" class="nav-link">
+          <i class="fas fa-tools"></i>
+          By Service
+        </a>
+        <a href="channels.html" class="nav-link">
+          <i class="fas fa-bullhorn"></i>
+          By Channel
+        </a>
+        <a href="analysis.html" class="nav-link active">
+          <i class="fas fa-filter"></i>
+          Analysis
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Planning</div>
+        <a href="optimizer.html" class="nav-link">
+          <i class="fas fa-sliders-h"></i>
+          2026 Planner
+        </a>
+      </nav>
+
+      <div class="ai-status">
+        <div class="ai-status-header">
+          <div class="ai-status-dot"></div>
+          <span class="ai-status-title">Connected</span>
+        </div>
+        <div class="ai-status-text">Data syncs daily</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Performance Analysis</h1>
+          <p class="page-subtitle">Filter by location, service, and channel to find what works best</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-group">
+          <div class="filter-label">Location</div>
+          <select class="filter-select" id="locationFilter" onchange="applyFilters()">
+            <option value="all">All Locations</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Service</div>
+          <select class="filter-select" id="serviceFilter" onchange="applyFilters()">
+            <option value="all">All Services</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-label">Channel</div>
+          <select class="filter-select" id="channelFilter" onchange="applyFilters()">
+            <option value="all">All Channels</option>
+          </select>
+        </div>
+        <button class="reset-btn" onclick="resetFilters()">
+          <i class="fas fa-undo"></i> Reset
+        </button>
+      </div>
+
+      <!-- Results Summary -->
+      <div class="results-summary">
+        <div class="summary-header">
+          <div class="summary-title" id="summaryTitle">All Data (2025)</div>
+          <div class="summary-filters" id="activeFilters"></div>
+        </div>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <div class="metric-value" id="metricSpend">$25K</div>
+            <div class="metric-label">Monthly Spend</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value good" id="metricRevenue">$292K</div>
+            <div class="metric-label">Monthly Revenue</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="metricROAS">$11.67</div>
+            <div class="metric-label">ROAS</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="metricCAC">$500</div>
+            <div class="metric-label">CAC</div>
+          </div>
+          <div class="metric-item">
+            <div class="metric-value" id="metricCustomers">50</div>
+            <div class="metric-label">Customers/Mo</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insight -->
+      <div class="insight-box" id="insightBox" style="margin-bottom: 24px;">
+        Select filters above to analyze specific combinations. Find out which location + service + channel combinations deliver the best returns.
+      </div>
+
+      <!-- Breakdown Tables -->
+      <div class="comparison-row">
+        <!-- By Location -->
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+            Breakdown by Location
+          </div>
+          <table class="breakdown-table" id="locationTable">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Spend</th>
+                <th>Revenue</th>
+                <th style="width: 200px;">ROAS</th>
+              </tr>
+            </thead>
+            <tbody id="locationTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- By Service -->
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-tools" style="color: var(--secondary);"></i>
+            Breakdown by Service
+          </div>
+          <table class="breakdown-table" id="serviceTable">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Spend</th>
+                <th>Revenue</th>
+                <th style="width: 200px;">ROAS</th>
+              </tr>
+            </thead>
+            <tbody id="serviceTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Channel Breakdown -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+          <i class="fas fa-bullhorn" style="color: var(--warning);"></i>
+          Breakdown by Channel
+        </div>
+        <table class="breakdown-table" id="channelTable">
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>Spend</th>
+              <th>Revenue</th>
+              <th>CAC</th>
+              <th>Leads</th>
+              <th>Customers</th>
+              <th style="width: 250px;">ROAS</th>
+            </tr>
+          </thead>
+          <tbody id="channelTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Best Combinations -->
+      <div class="card">
+        <div class="section-title">
+          <i class="fas fa-trophy" style="color: var(--warning);"></i>
+          Top Performing Combinations
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Based on estimated ROAS for each location + service + channel combination
+        </p>
+        <table class="breakdown-table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Service</th>
+              <th>Channel</th>
+              <th>Est. ROAS</th>
+              <th>Recommendation</th>
+            </tr>
+          </thead>
+          <tbody id="combinationsTable"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    // Generate combination data based on individual performance
+    let combinationData = [];
+    // Use seeded random for consistent results
+    let seed = 12345;
+    function seededRandom() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      generateCombinations();
+      populateFilters();
+      applyFilters();
+    });
+
+    function populateFilters() {
+      const locSelect = document.getElementById('locationFilter');
+      locations.forEach(l => {
+        locSelect.innerHTML += `<option value="${l.name}">${l.name}</option>`;
+      });
+
+      const svcSelect = document.getElementById('serviceFilter');
+      services.forEach(s => {
+        svcSelect.innerHTML += `<option value="${s.shortName}">${s.shortName}</option>`;
+      });
+
+      const chSelect = document.getElementById('channelFilter');
+      channels.forEach(c => {
+        chSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+      });
+    }
+
+    function generateCombinations() {
+      combinationData = [];
+      seed = 12345; // Reset seed for consistent data
+
+      locations.forEach(loc => {
+        services.forEach(svc => {
+          channels.forEach(ch => {
+            // Calculate estimated ROAS for this combination
+            const baseROAS = (loc.roas * 0.4 + svc.roas * 0.35 + ch.roas * 0.25);
+            const variance = 0.85 + seededRandom() * 0.3;
+            const estROAS = baseROAS * variance;
+
+            // Estimate spend allocation proportionally
+            const locShare = loc.spend / locations.reduce((s, l) => s + l.spend, 0);
+            const svcShare = svc.spend / services.reduce((s, sv) => s + sv.spend, 0);
+            const chShare = ch.spend / channels.reduce((s, c) => s + c.spend, 0);
+            const estSpend = companyData.monthly.spend * locShare * svcShare * chShare * 4;
+            const estRevenue = estSpend * estROAS;
+            const estCustomers = Math.max(1, Math.round(estSpend / (loc.cac * 0.4 + svc.cac * 0.35 + ch.cac * 0.25)));
+            const estCAC = estCustomers > 0 ? estSpend / estCustomers : 0;
+
+            combinationData.push({
+              location: loc.name,
+              service: svc.shortName,
+              channel: ch.name,
+              estROAS: estROAS,
+              estSpend: estSpend,
+              estRevenue: estRevenue,
+              estCustomers: estCustomers,
+              estCAC: estCAC,
+              locData: loc,
+              svcData: svc,
+              chData: ch
+            });
+          });
+        });
+      });
+
+      combinationData.sort((a, b) => b.estROAS - a.estROAS);
+    }
+
+    // Get aggregated data for a dimension filtered by other dimensions
+    function getFilteredDimensionData(dimension, locFilter, svcFilter, chFilter) {
+      const filtered = combinationData.filter(c =>
+        (locFilter === 'all' || c.location === locFilter) &&
+        (svcFilter === 'all' || c.service === svcFilter) &&
+        (chFilter === 'all' || c.channel === chFilter)
+      );
+
+      const grouped = {};
+
+      filtered.forEach(c => {
+        let key;
+        if (dimension === 'location') key = c.location;
+        else if (dimension === 'service') key = c.service;
+        else key = c.channel;
+
+        if (!grouped[key]) {
+          grouped[key] = { spend: 0, revenue: 0, customers: 0, count: 0 };
+        }
+        grouped[key].spend += c.estSpend;
+        grouped[key].revenue += c.estRevenue;
+        grouped[key].customers += c.estCustomers;
+        grouped[key].count++;
+      });
+
+      return Object.keys(grouped).map(key => ({
+        name: key,
+        spend: grouped[key].spend,
+        revenue: grouped[key].revenue,
+        customers: grouped[key].customers,
+        roas: grouped[key].spend > 0 ? grouped[key].revenue / grouped[key].spend : 0,
+        cac: grouped[key].customers > 0 ? grouped[key].spend / grouped[key].customers : 0
+      })).sort((a, b) => b.roas - a.roas);
+    }
+
+    function applyFilters() {
+      const locFilter = document.getElementById('locationFilter').value;
+      const svcFilter = document.getElementById('serviceFilter').value;
+      const chFilter = document.getElementById('channelFilter').value;
+
+      // Get filtered combination data
+      const filtered = combinationData.filter(c =>
+        (locFilter === 'all' || c.location === locFilter) &&
+        (svcFilter === 'all' || c.service === svcFilter) &&
+        (chFilter === 'all' || c.channel === chFilter)
+      );
+
+      // Calculate totals from filtered combinations
+      const totalSpend = filtered.reduce((s, c) => s + c.estSpend, 0);
+      const totalRevenue = filtered.reduce((s, c) => s + c.estRevenue, 0);
+      const totalCustomers = filtered.reduce((s, c) => s + c.estCustomers, 0);
+
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+      const cac = totalCustomers > 0 ? totalSpend / totalCustomers : 0;
+
+      // Update metrics display
+      document.getElementById('metricSpend').textContent = formatCurrency(totalSpend);
+      document.getElementById('metricRevenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('metricROAS').textContent = formatROAS(roas);
+      document.getElementById('metricCAC').textContent = formatCAC(cac);
+      document.getElementById('metricCustomers').textContent = totalCustomers;
+
+      // Color code ROAS
+      const roasEl = document.getElementById('metricROAS');
+      roasEl.className = 'metric-value';
+      if (roas > companyData.roas * 1.1) roasEl.classList.add('good');
+      else if (roas < companyData.roas * 0.9) roasEl.classList.add('warning');
+
+      // Update title and tags
+      updateSummaryTitle(locFilter, svcFilter, chFilter);
+      updateInsight(locFilter, svcFilter, chFilter, roas);
+
+      // Update breakdown tables with cross-filtered data
+      renderLocationTable(locFilter, svcFilter, chFilter);
+      renderServiceTable(locFilter, svcFilter, chFilter);
+      renderChannelTable(locFilter, svcFilter, chFilter);
+      renderCombinationsTable(locFilter, svcFilter, chFilter);
+    }
+
+    function updateSummaryTitle(loc, svc, ch) {
+      const parts = [];
+      if (loc !== 'all') parts.push(loc);
+      if (svc !== 'all') parts.push(svc);
+      if (ch !== 'all') parts.push(ch);
+
+      const title = parts.length > 0 ? parts.join(' + ') : 'All Data';
+      document.getElementById('summaryTitle').textContent = title + ' (2025)';
+
+      // Update filter tags
+      let tagsHtml = '';
+      if (loc !== 'all') tagsHtml += `<span class="filter-tag">${loc}</span>`;
+      if (svc !== 'all') tagsHtml += `<span class="filter-tag secondary">${svc}</span>`;
+      if (ch !== 'all') tagsHtml += `<span class="filter-tag warning">${ch}</span>`;
+      document.getElementById('activeFilters').innerHTML = tagsHtml;
+    }
+
+    function updateInsight(loc, svc, ch, roas) {
+      const avgROAS = companyData.roas;
+      let insight = '';
+
+      if (loc === 'all' && svc === 'all' && ch === 'all') {
+        insight = 'Select filters above to analyze specific combinations. Find out which location + service + channel combinations deliver the best returns.';
+      } else {
+        const performance = roas > avgROAS * 1.1 ? 'above average' : roas < avgROAS * 0.9 ? 'below average' : 'at average';
+        const diff = ((roas / avgROAS - 1) * 100).toFixed(0);
+        const diffText = diff > 0 ? `+${diff}%` : `${diff}%`;
+
+        if (loc !== 'all' && svc !== 'all' && ch !== 'all') {
+          insight = `<strong>${loc} + ${svc} + ${ch}</strong> performs ${performance} with ROAS of ${formatROAS(roas)} (${diffText} vs company average). `;
+          if (roas > avgROAS * 1.1) {
+            insight += 'Consider increasing budget for this combination.';
+          } else if (roas < avgROAS * 0.9) {
+            insight += 'Review targeting and messaging for this combination.';
+          }
+        } else if (loc !== 'all' && svc !== 'all') {
+          insight = `<strong>${svc}</strong> in <strong>${loc}</strong> shows ${performance} performance. Compare channels below to optimize further.`;
+        } else if (loc !== 'all' && ch !== 'all') {
+          insight = `<strong>${ch}</strong> in <strong>${loc}</strong> shows ${performance} performance. Compare services below to find best combinations.`;
+        } else if (svc !== 'all' && ch !== 'all') {
+          insight = `<strong>${svc}</strong> via <strong>${ch}</strong> shows ${performance} performance. Compare locations below to find best markets.`;
+        } else {
+          const filterName = loc !== 'all' ? loc : svc !== 'all' ? svc : ch;
+          insight = `<strong>${filterName}</strong> performs ${performance} with ROAS of ${formatROAS(roas)} (${diffText} vs company average).`;
+        }
+      }
+
+      document.getElementById('insightBox').innerHTML = insight;
+    }
+
+    function renderLocationTable(locFilter, svcFilter, chFilter) {
+      const tbody = document.getElementById('locationTableBody');
+
+      // Get location data filtered by service and channel selections
+      const data = getFilteredDimensionData('location', 'all', svcFilter, chFilter);
+
+      // If a specific location is selected, only show that one
+      const displayData = locFilter !== 'all'
+        ? data.filter(d => d.name === locFilter)
+        : data;
+
+      if (displayData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="no-data">No data available</td></tr>';
+        return;
+      }
+
+      const maxROAS = Math.max(...displayData.map(d => d.roas));
+
+      tbody.innerHTML = displayData.map(l => `
+        <tr>
+          <td class="name-cell">${l.name}</td>
+          <td>${formatCurrency(l.spend)}</td>
+          <td>${formatCurrency(l.revenue)}</td>
+          <td>
+            <div class="roas-bar">
+              <div class="roas-bar-track">
+                <div class="roas-bar-fill" style="width: ${(l.roas / maxROAS * 100)}%; background: ${l.roas > companyData.roas ? '#10B981' : '#F59E0B'};"></div>
+              </div>
+              <span class="roas-value">${formatROAS(l.roas)}</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderServiceTable(locFilter, svcFilter, chFilter) {
+      const tbody = document.getElementById('serviceTableBody');
+
+      // Get service data filtered by location and channel selections
+      const data = getFilteredDimensionData('service', locFilter, 'all', chFilter);
+
+      // If a specific service is selected, only show that one
+      const displayData = svcFilter !== 'all'
+        ? data.filter(d => d.name === svcFilter)
+        : data;
+
+      if (displayData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="no-data">No data available</td></tr>';
+        return;
+      }
+
+      const maxROAS = Math.max(...displayData.map(d => d.roas));
+
+      tbody.innerHTML = displayData.map(s => `
+        <tr>
+          <td class="name-cell">${s.name}</td>
+          <td>${formatCurrency(s.spend)}</td>
+          <td>${formatCurrency(s.revenue)}</td>
+          <td>
+            <div class="roas-bar">
+              <div class="roas-bar-track">
+                <div class="roas-bar-fill" style="width: ${(s.roas / maxROAS * 100)}%; background: ${s.roas > companyData.roas ? '#10B981' : '#F59E0B'};"></div>
+              </div>
+              <span class="roas-value">${formatROAS(s.roas)}</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderChannelTable(locFilter, svcFilter, chFilter) {
+      const tbody = document.getElementById('channelTableBody');
+
+      // Get channel data filtered by location and service selections
+      const data = getFilteredDimensionData('channel', locFilter, svcFilter, 'all');
+
+      // If a specific channel is selected, only show that one
+      const displayData = chFilter !== 'all'
+        ? data.filter(d => d.name === chFilter)
+        : data;
+
+      if (displayData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">No data available</td></tr>';
+        return;
+      }
+
+      const maxROAS = Math.max(...displayData.map(d => d.roas));
+
+      tbody.innerHTML = displayData.map(c => `
+        <tr>
+          <td class="name-cell">${c.name}</td>
+          <td>${formatCurrency(c.spend)}</td>
+          <td>${formatCurrency(c.revenue)}</td>
+          <td>${formatCAC(c.cac)}</td>
+          <td>${Math.round(c.customers / 0.25)}</td>
+          <td>${c.customers}</td>
+          <td>
+            <div class="roas-bar">
+              <div class="roas-bar-track">
+                <div class="roas-bar-fill" style="width: ${(c.roas / maxROAS * 100)}%; background: ${c.roas > companyData.roas ? '#10B981' : '#F59E0B'};"></div>
+              </div>
+              <span class="roas-value">${formatROAS(c.roas)}</span>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCombinationsTable(locFilter, svcFilter, chFilter) {
+      const avgROAS = companyData.roas;
+
+      // Filter combinations based on active filters
+      let filtered = combinationData.filter(c =>
+        (locFilter === 'all' || c.location === locFilter) &&
+        (svcFilter === 'all' || c.service === svcFilter) &&
+        (chFilter === 'all' || c.channel === chFilter)
+      );
+
+      // Sort by ROAS and take top 10
+      filtered.sort((a, b) => b.estROAS - a.estROAS);
+      const top10 = filtered.slice(0, 10);
+
+      if (top10.length === 0) {
+        document.getElementById('combinationsTable').innerHTML =
+          '<tr><td colspan="5" class="no-data">No combinations match filters</td></tr>';
+        return;
+      }
+
+      document.getElementById('combinationsTable').innerHTML = top10.map((c, i) => {
+        const performance = c.estROAS > avgROAS * 1.2 ? 'Increase budget' :
+                           c.estROAS > avgROAS ? 'Maintain' : 'Review';
+        const perfClass = c.estROAS > avgROAS * 1.2 ? 'good' :
+                         c.estROAS > avgROAS ? '' : 'warning';
+
+        return `
+          <tr>
+            <td class="name-cell">${c.location}</td>
+            <td>${c.service}</td>
+            <td>${c.channel}</td>
+            <td style="font-weight: 600; color: var(--secondary);">${formatROAS(c.estROAS)}</td>
+            <td><span class="metric-value ${perfClass}" style="font-size: 13px;">${performance}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetFilters() {
+      document.getElementById('locationFilter').value = 'all';
+      document.getElementById('serviceFilter').value = 'all';
+      document.getElementById('channelFilter').value = 'all';
+      applyFilters();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Locations | Creative Outdoor Florida</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .big-number { font-size: 42px; font-weight: 700; line-height: 1; }
+    .big-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    .metric-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .highlight-green { color: var(--secondary); }
+    .highlight-blue { color: var(--primary); }
+    .highlight-red { color: var(--danger); }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .last-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .simple-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .simple-stat:last-child { border-bottom: none; }
+    .stat-label { font-size: 14px; }
+    .stat-value { font-weight: 600; }
+    .location-row {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .location-row:last-child { border-bottom: none; }
+    .location-row:hover { background: var(--bg-hover); }
+    .location-name { font-weight: 600; width: 120px; }
+    .location-bar-container { flex: 1; height: 24px; background: #E2E8F0; border-radius: 4px; position: relative; }
+    .location-bar { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .location-stats { display: flex; gap: 24px; font-size: 13px; }
+    .location-stat { text-align: right; }
+    .location-stat-label { color: var(--text-muted); font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>Creative Outdoor</h1>
+        <span>Marketing Dashboard</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Views</div>
+        <a href="index.html" class="nav-link">
+          <i class="fas fa-home"></i>
+          Overview
+        </a>
+        <a href="locations.html" class="nav-link active">
+          <i class="fas fa-map-marker-alt"></i>
+          By Location
+        </a>
+        <a href="services.html" class="nav-link">
+          <i class="fas fa-tools"></i>
+          By Service
+        </a>
+        <a href="channels.html" class="nav-link">
+          <i class="fas fa-bullhorn"></i>
+          By Channel
+        </a>
+        <a href="analysis.html" class="nav-link">
+          <i class="fas fa-filter"></i>
+          Analysis
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Planning</div>
+        <a href="optimizer.html" class="nav-link">
+          <i class="fas fa-sliders-h"></i>
+          2026 Planner
+        </a>
+      </nav>
+
+      <div class="ai-status">
+        <div class="ai-status-header">
+          <div class="ai-status-dot"></div>
+          <span class="ai-status-title">Connected</span>
+        </div>
+        <div class="ai-status-text">Data syncs daily</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Location Performance</h1>
+          <p class="page-subtitle">Which Florida markets give you the best return?</p>
+        </div>
+        <div class="last-updated">
+          <div class="live-dot"></div>
+          Monthly data
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="grid-4" style="margin-bottom: 24px;">
+        <div class="metric-box">
+          <div class="big-number highlight-blue">10</div>
+          <div class="big-label">Florida Locations</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number" id="totalSpend">$25K</div>
+          <div class="big-label">Monthly Spend</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number highlight-green" id="avgROAS">$11.67</div>
+          <div class="big-label">Avg. Return per $1</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number" id="avgCAC">$500</div>
+          <div class="big-label">Avg. Cost per Customer</div>
+        </div>
+      </div>
+
+      <!-- Best vs Worst -->
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <!-- Best Performers by ROAS -->
+        <div class="card" style="border-top: 4px solid var(--secondary);">
+          <div class="section-title">
+            <i class="fas fa-trophy" style="color: var(--secondary);"></i>
+            Top 5 by Return on Spend
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Highest dollars returned per dollar spent
+          </p>
+          <div class="chart-container" style="height: 250px;">
+            <canvas id="topROASChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Highest CAC (need attention) -->
+        <div class="card" style="border-top: 4px solid var(--danger);">
+          <div class="section-title">
+            <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+            Highest Acquisition Costs
+          </div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+            Locations where each customer costs more
+          </p>
+          <div class="chart-container" style="height: 250px;">
+            <canvas id="highCACChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Locations Revenue -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+          <i class="fas fa-dollar-sign" style="color: var(--primary);"></i>
+          Monthly Revenue by Location
+        </div>
+        <div class="chart-container" style="height: 350px;">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Location List -->
+      <div class="card">
+        <div class="section-title">
+          <i class="fas fa-list" style="color: var(--primary);"></i>
+          All Locations Overview
+        </div>
+        <div id="locationsList"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.plugins.legend.display = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderSummary();
+      renderTopROAS();
+      renderHighCAC();
+      renderRevenueChart();
+      renderLocationsList();
+    });
+
+    function renderSummary() {
+      const totalSpend = locations.reduce((sum, l) => sum + l.spend, 0);
+      document.getElementById('totalSpend').textContent = formatCurrency(totalSpend);
+      document.getElementById('avgROAS').textContent = formatROAS(companyData.roas);
+      document.getElementById('avgCAC').textContent = formatCAC(companyData.cac);
+    }
+
+    function renderTopROAS() {
+      const top5 = getLocationsByROAS().slice(0, 5);
+      const ctx = document.getElementById('topROASChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: top5.map(l => l.name),
+          datasets: [{
+            data: top5.map(l => l.roas),
+            backgroundColor: '#10B981',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => '$' + value.toFixed(2) + ' return',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...top5.map(l => l.roas)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderHighCAC() {
+      // Get bottom 5 by ROAS (highest CAC relative to performance)
+      const bottom5 = getLocationsByCAC().slice(-5).reverse();
+      const avgCAC = companyData.cac;
+      const ctx = document.getElementById('highCACChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: bottom5.map(l => l.name),
+          datasets: [{
+            data: bottom5.map(l => l.cac),
+            backgroundColor: bottom5.map(l => l.cac > avgCAC ? '#EF4444' : '#F59E0B'),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => '$' + Math.round(value) + ' per customer',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...bottom5.map(l => l.cac)) * 1.5
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRevenueChart() {
+      const sorted = [...locations].sort((a, b) => b.revenue - a.revenue);
+      const avgROAS = companyData.roas;
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(l => l.name),
+          datasets: [{
+            data: sorted.map(l => l.revenue),
+            backgroundColor: sorted.map(l => {
+              if (l.roas > avgROAS * 1.2) return '#10B981';
+              if (l.roas < avgROAS * 0.8) return '#EF4444';
+              return '#2563EB';
+            }),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value, context) => {
+                const loc = sorted[context.dataIndex];
+                return formatCurrency(value) + ' (ROAS: $' + loc.roas.toFixed(2) + ')';
+              },
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 11 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...sorted.map(l => l.revenue)) * 1.5
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderLocationsList() {
+      const sorted = getLocationsByROAS();
+      const maxRevenue = Math.max(...sorted.map(l => l.revenue));
+      const avgROAS = companyData.roas;
+
+      document.getElementById('locationsList').innerHTML = sorted.map(loc => {
+        const barWidth = (loc.revenue / maxRevenue * 100);
+        const barColor = loc.roas > avgROAS * 1.1 ? '#10B981' :
+                         loc.roas < avgROAS * 0.9 ? '#EF4444' : '#2563EB';
+
+        return `
+          <div class="location-row">
+            <div class="location-name">${loc.name}</div>
+            <div class="location-bar-container">
+              <div class="location-bar" style="width: ${barWidth}%; background: ${barColor};"></div>
+            </div>
+            <div class="location-stats">
+              <div class="location-stat">
+                <div>${formatCurrency(loc.revenue)}</div>
+                <div class="location-stat-label">Revenue</div>
+              </div>
+              <div class="location-stat">
+                <div>${formatCurrency(loc.spend)}</div>
+                <div class="location-stat-label">Spend</div>
+              </div>
+              <div class="location-stat">
+                <div style="color: ${barColor}; font-weight: 600;">${formatROAS(loc.roas)}</div>
+                <div class="location-stat-label">ROAS</div>
+              </div>
+              <div class="location-stat">
+                <div>${formatCAC(loc.cac)}</div>
+                <div class="location-stat-label">CAC</div>
+              </div>
+              <div class="location-stat">
+                <div>${loc.customers}</div>
+                <div class="location-stat-label">Customers</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

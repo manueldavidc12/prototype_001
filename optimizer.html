@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 Forecast | Creative Outdoor Florida</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .forecast-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 24px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .forecast-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .forecast-panel { display: none; }
+    .forecast-panel.active { display: block; }
+    .forecast-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 100px 120px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+    .forecast-row:last-child { border-bottom: none; }
+    .forecast-name { font-weight: 500; font-size: 14px; }
+    .forecast-current { font-size: 12px; color: var(--text-muted); }
+    .forecast-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      text-align: right;
+    }
+    .forecast-input:focus { outline: none; border-color: var(--primary); }
+    .forecast-result {
+      text-align: right;
+      font-weight: 600;
+    }
+    .forecast-result.positive { color: var(--secondary); }
+    .forecast-result.negative { color: var(--danger); }
+    .totals-bar {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+    }
+    .total-item { text-align: center; }
+    .total-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .total-value { font-size: 20px; font-weight: 700; }
+    .results-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: var(--text-muted); font-size: 14px; }
+    .result-value { font-weight: 600; font-size: 16px; }
+    .result-change { font-size: 12px; margin-left: 8px; }
+    .result-change.up { color: var(--secondary); }
+    .result-change.down { color: var(--danger); }
+    .comparison-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .compare-box {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+    }
+    .compare-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .compare-value { font-size: 24px; font-weight: 700; }
+    .compare-value.current { color: var(--text-muted); }
+    .compare-value.projected { color: var(--secondary); }
+    .metric-explainer {
+      background: rgba(37, 99, 235, 0.05);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      border-left: 3px solid var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>Creative Outdoor</h1>
+        <span>Marketing Dashboard</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Views</div>
+        <a href="index.html" class="nav-link">
+          <i class="fas fa-home"></i>
+          Overview
+        </a>
+        <a href="locations.html" class="nav-link">
+          <i class="fas fa-map-marker-alt"></i>
+          By Location
+        </a>
+        <a href="services.html" class="nav-link">
+          <i class="fas fa-tools"></i>
+          By Service
+        </a>
+        <a href="channels.html" class="nav-link">
+          <i class="fas fa-bullhorn"></i>
+          By Channel
+        </a>
+        <a href="analysis.html" class="nav-link">
+          <i class="fas fa-filter"></i>
+          Analysis
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Planning</div>
+        <a href="optimizer.html" class="nav-link active">
+          <i class="fas fa-sliders-h"></i>
+          2026 Planner
+        </a>
+      </nav>
+
+      <div class="ai-status">
+        <div class="ai-status-header">
+          <div class="ai-status-dot"></div>
+          <span class="ai-status-title">Connected</span>
+        </div>
+        <div class="ai-status-text">Data syncs daily</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">2026 Budget Forecast</h1>
+          <p class="page-subtitle">See projected returns based on your 2025 performance</p>
+        </div>
+      </div>
+
+      <div class="metric-explainer">
+        <strong>How this works:</strong> Enter your planned 2026 monthly spend for each location, service, or channel.
+        The projected revenue and CAC are calculated using your actual 2025 ROAS and conversion rates.
+      </div>
+
+      <div class="forecast-layout">
+        <!-- Left Column - Budget Inputs -->
+        <div>
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="section-title">
+              <i class="fas fa-calculator" style="color: var(--primary);"></i>
+              Plan Your 2026 Budget
+            </div>
+
+            <div class="forecast-tabs">
+              <button class="tab-btn active" onclick="showPanel('location')">
+                <i class="fas fa-map-marker-alt"></i> By Location
+              </button>
+              <button class="tab-btn" onclick="showPanel('service')">
+                <i class="fas fa-tools"></i> By Service
+              </button>
+              <button class="tab-btn" onclick="showPanel('channel')">
+                <i class="fas fa-bullhorn"></i> By Channel
+              </button>
+            </div>
+
+            <!-- Location Panel -->
+            <div class="forecast-panel active" id="locationPanel">
+              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
+                <div>Location</div>
+                <div>2026 Monthly Spend</div>
+                <div style="text-align: right;">Proj. Revenue</div>
+                <div style="text-align: right;">Proj. CAC</div>
+              </div>
+              <div id="locationInputs"></div>
+            </div>
+
+            <!-- Service Panel -->
+            <div class="forecast-panel" id="servicePanel">
+              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
+                <div>Service</div>
+                <div>2026 Monthly Spend</div>
+                <div style="text-align: right;">Proj. Revenue</div>
+                <div style="text-align: right;">Proj. CAC</div>
+              </div>
+              <div id="serviceInputs"></div>
+            </div>
+
+            <!-- Channel Panel -->
+            <div class="forecast-panel" id="channelPanel">
+              <div class="forecast-row" style="font-weight: 600; font-size: 12px; color: var(--text-muted); border-bottom: 2px solid var(--border);">
+                <div>Channel</div>
+                <div>2026 Monthly Spend</div>
+                <div style="text-align: right;">Proj. Revenue</div>
+                <div style="text-align: right;">Proj. CAC</div>
+              </div>
+              <div id="channelInputs"></div>
+            </div>
+
+            <div class="totals-bar">
+              <div class="total-item">
+                <div class="total-label">Total Monthly Spend</div>
+                <div class="total-value" id="totalSpend">$25,000</div>
+              </div>
+              <div class="total-item">
+                <div class="total-label">Projected Monthly Revenue</div>
+                <div class="total-value" style="color: var(--secondary);" id="totalRevenue">$291,667</div>
+              </div>
+              <div class="total-item">
+                <div class="total-label">Projected ROAS</div>
+                <div class="total-value" id="totalROAS">$11.67</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart -->
+          <div class="card">
+            <div class="section-title">
+              <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+              Projected Revenue by Location
+            </div>
+            <div class="chart-container" style="height: 300px;">
+              <canvas id="forecastChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Results -->
+        <div>
+          <!-- 2025 vs 2026 Comparison -->
+          <div class="results-card">
+            <div class="section-title" style="margin-bottom: 16px;">
+              <i class="fas fa-exchange-alt" style="color: var(--primary);"></i>
+              2025 vs 2026 Projection
+            </div>
+
+            <div class="comparison-header">
+              <div class="compare-box">
+                <div class="compare-label">2025 Actual</div>
+                <div class="compare-value current">$3.5M</div>
+              </div>
+              <div class="compare-box">
+                <div class="compare-label">2026 Projected</div>
+                <div class="compare-value projected" id="projectedAnnual">$3.5M</div>
+              </div>
+            </div>
+
+            <div class="result-row">
+              <span class="result-label">Annual Marketing Spend</span>
+              <span class="result-value">
+                <span id="annualSpend">$300,000</span>
+                <span class="result-change" id="spendChange"></span>
+              </span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Projected Annual Revenue</span>
+              <span class="result-value">
+                <span id="annualRevenue">$3,500,000</span>
+                <span class="result-change" id="revenueChange"></span>
+              </span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Projected ROAS</span>
+              <span class="result-value">
+                <span id="projROAS">$11.67</span>
+                <span class="result-change" id="roasChange"></span>
+              </span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Projected CAC</span>
+              <span class="result-value">
+                <span id="projCAC">$500</span>
+                <span class="result-change" id="cacChange"></span>
+              </span>
+            </div>
+            <div class="result-row">
+              <span class="result-label">Projected Customers</span>
+              <span class="result-value">
+                <span id="projCustomers">600</span>
+                <span class="result-change" id="customersChange"></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Key Insights -->
+          <div class="results-card">
+            <div class="section-title" style="margin-bottom: 16px;">
+              <i class="fas fa-lightbulb" style="color: var(--warning);"></i>
+              Based on 2025 Data
+            </div>
+            <div id="insightsList" style="font-size: 14px; line-height: 1.7;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Performance by ROAS -->
+          <div class="results-card">
+            <div class="section-title" style="margin-bottom: 12px;">
+              <i class="fas fa-trophy" style="color: var(--secondary);"></i>
+              Best Performers (2025)
+            </div>
+            <div id="topPerformers" style="font-size: 13px;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.plugins.legend.display = false;
+
+    let forecastData = {
+      locations: {},
+      services: {},
+      channels: {}
+    };
+    let forecastChart = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initForecast();
+      renderInputs();
+      renderInsights();
+      renderTopPerformers();
+      updateTotals();
+      renderChart();
+    });
+
+    function initForecast() {
+      // Initialize with current 2025 spend
+      locations.forEach(l => forecastData.locations[l.name] = { spend: l.spend, roas: l.roas, cac: l.cac });
+      services.forEach(s => forecastData.services[s.shortName] = { spend: s.spend, roas: s.roas, cac: s.cac });
+      channels.forEach(c => forecastData.channels[c.name] = { spend: c.spend, roas: c.roas, cac: c.cac });
+    }
+
+    function renderInputs() {
+      // Location inputs
+      document.getElementById('locationInputs').innerHTML = locations.map(l => `
+        <div class="forecast-row">
+          <div>
+            <div class="forecast-name">${l.name}</div>
+            <div class="forecast-current">2025: ${formatCurrency(l.spend)}/mo</div>
+          </div>
+          <div>
+            <input type="number" class="forecast-input" value="${l.spend}"
+              onchange="updateForecast('locations', '${l.name}', this.value)"
+              placeholder="Monthly spend">
+          </div>
+          <div class="forecast-result positive" id="loc-rev-${l.name.replace(/\s/g, '')}">${formatCurrency(l.revenue)}</div>
+          <div class="forecast-result" id="loc-cac-${l.name.replace(/\s/g, '')}">${formatCAC(l.cac)}</div>
+        </div>
+      `).join('');
+
+      // Service inputs
+      document.getElementById('serviceInputs').innerHTML = services.map(s => `
+        <div class="forecast-row">
+          <div>
+            <div class="forecast-name">${s.shortName}</div>
+            <div class="forecast-current">2025: ${formatCurrency(s.spend)}/mo</div>
+          </div>
+          <div>
+            <input type="number" class="forecast-input" value="${s.spend}"
+              onchange="updateForecast('services', '${s.shortName}', this.value)"
+              placeholder="Monthly spend">
+          </div>
+          <div class="forecast-result positive" id="svc-rev-${s.shortName.replace(/\s/g, '')}">${formatCurrency(s.revenue)}</div>
+          <div class="forecast-result" id="svc-cac-${s.shortName.replace(/\s/g, '')}">${formatCAC(s.cac)}</div>
+        </div>
+      `).join('');
+
+      // Channel inputs
+      document.getElementById('channelInputs').innerHTML = channels.map(c => `
+        <div class="forecast-row">
+          <div>
+            <div class="forecast-name">${c.name}</div>
+            <div class="forecast-current">2025: ${formatCurrency(c.spend)}/mo</div>
+          </div>
+          <div>
+            <input type="number" class="forecast-input" value="${c.spend}"
+              onchange="updateForecast('channels', '${c.name}', this.value)"
+              placeholder="Monthly spend">
+          </div>
+          <div class="forecast-result positive" id="ch-rev-${c.name.replace(/\s/g, '')}">${formatCurrency(c.revenue)}</div>
+          <div class="forecast-result" id="ch-cac-${c.name.replace(/\s/g, '')}">${formatCAC(c.cac)}</div>
+        </div>
+      `).join('');
+    }
+
+    function updateForecast(type, name, value) {
+      const spend = parseInt(value) || 0;
+      forecastData[type][name].spend = spend;
+
+      // Calculate projected revenue based on 2025 ROAS
+      const roas = forecastData[type][name].roas;
+      const projRevenue = spend * roas;
+
+      // Update display
+      const prefix = type === 'locations' ? 'loc' : type === 'services' ? 'svc' : 'ch';
+      const safeName = name.replace(/\s/g, '');
+      document.getElementById(`${prefix}-rev-${safeName}`).textContent = formatCurrency(projRevenue);
+
+      updateTotals();
+      renderChart();
+    }
+
+    function updateTotals() {
+      // Calculate totals from location data (primary)
+      let totalSpend = 0;
+      let totalRevenue = 0;
+
+      Object.keys(forecastData.locations).forEach(name => {
+        const data = forecastData.locations[name];
+        totalSpend += data.spend;
+        totalRevenue += data.spend * data.roas;
+      });
+
+      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
+      const annualSpend = totalSpend * 12;
+      const annualRevenue = totalRevenue * 12;
+      const projCustomers = Math.round(annualSpend / companyData.cac);
+      const projCAC = projCustomers > 0 ? annualSpend / projCustomers : 0;
+
+      // Update displays
+      document.getElementById('totalSpend').textContent = formatCurrency(totalSpend);
+      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('totalROAS').textContent = formatROAS(roas);
+
+      document.getElementById('annualSpend').textContent = formatCurrencyFull(annualSpend);
+      document.getElementById('annualRevenue').textContent = formatCurrencyFull(annualRevenue);
+      document.getElementById('projectedAnnual').textContent = formatCurrency(annualRevenue);
+      document.getElementById('projROAS').textContent = formatROAS(roas);
+      document.getElementById('projCAC').textContent = formatCAC(projCAC);
+      document.getElementById('projCustomers').textContent = formatNumber(projCustomers);
+
+      // Calculate changes vs 2025
+      const baseSpend = companyData.annual.spend;
+      const baseRevenue = companyData.annual.revenue;
+      const baseROAS = companyData.roas;
+      const baseCAC = companyData.cac;
+      const baseCustomers = companyData.annual.customers;
+
+      updateChange('spendChange', annualSpend, baseSpend, true);
+      updateChange('revenueChange', annualRevenue, baseRevenue, false);
+      updateChange('roasChange', roas, baseROAS, false);
+      updateChange('cacChange', projCAC, baseCAC, true);
+      updateChange('customersChange', projCustomers, baseCustomers, false);
+    }
+
+    function updateChange(elementId, newVal, oldVal, lowerIsBetter) {
+      const pctChange = ((newVal - oldVal) / oldVal * 100);
+      const el = document.getElementById(elementId);
+
+      if (Math.abs(pctChange) < 0.5) {
+        el.textContent = '';
+        return;
+      }
+
+      const isUp = pctChange > 0;
+      const isGood = lowerIsBetter ? !isUp : isUp;
+
+      el.textContent = (isUp ? '+' : '') + pctChange.toFixed(1) + '%';
+      el.className = 'result-change ' + (isGood ? 'up' : 'down');
+    }
+
+    function showPanel(panel) {
+      document.querySelectorAll('.forecast-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(panel + 'Panel').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function renderInsights() {
+      const bestLoc = getLocationsByROAS()[0];
+      const worstLoc = getLocationsByROAS().slice(-1)[0];
+      const bestSvc = getServicesByROAS()[0];
+
+      document.getElementById('insightsList').innerHTML = `
+        <p style="margin-bottom: 12px;">
+          <strong>${bestLoc.name}</strong> has your best ROAS at <strong>${formatROAS(bestLoc.roas)}</strong>.
+          Every $1 spent there returns $${bestLoc.roas.toFixed(2)}.
+        </p>
+        <p style="margin-bottom: 12px;">
+          <strong>${worstLoc.name}</strong> has the lowest ROAS at <strong>${formatROAS(worstLoc.roas)}</strong>.
+          Consider reallocating some budget to higher-performing areas.
+        </p>
+        <p>
+          <strong>${bestSvc.shortName}</strong> generates ${formatCurrency(bestSvc.revenue)}/month
+          with a CAC of ${formatCAC(bestSvc.cac)}.
+        </p>
+      `;
+    }
+
+    function renderTopPerformers() {
+      const top5 = getLocationsByROAS().slice(0, 5);
+      document.getElementById('topPerformers').innerHTML = top5.map((l, i) => `
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <span>${i + 1}. ${l.name}</span>
+          <span style="font-weight: 600; color: var(--secondary);">${formatROAS(l.roas)} ROAS</span>
+        </div>
+      `).join('');
+    }
+
+    function renderChart() {
+      const ctx = document.getElementById('forecastChart').getContext('2d');
+
+      // Calculate projected revenues
+      const chartData = locations.map(l => ({
+        name: l.name,
+        revenue: forecastData.locations[l.name].spend * forecastData.locations[l.name].roas
+      })).sort((a, b) => b.revenue - a.revenue);
+
+      if (forecastChart) {
+        forecastChart.destroy();
+      }
+
+      forecastChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.map(d => d.name),
+          datasets: [{
+            data: chartData.map(d => d.revenue),
+            backgroundColor: '#2563EB',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => formatCurrency(value),
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 11 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...chartData.map(d => d.revenue)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

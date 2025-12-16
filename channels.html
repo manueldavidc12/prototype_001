@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Channels | Creative Outdoor Florida</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    .big-number { font-size: 42px; font-weight: 700; line-height: 1; }
+    .big-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+    .metric-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .highlight-green { color: var(--secondary); }
+    .highlight-blue { color: var(--primary); }
+    .highlight-orange { color: var(--warning); }
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .last-updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--secondary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .channel-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+    .channel-box.seo { border-top: 4px solid var(--primary); }
+    .channel-box.paid { border-top: 4px solid var(--warning); }
+    .channel-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .channel-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .channel-icon.seo { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+    .channel-icon.paid { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .channel-name { font-size: 24px; font-weight: 700; }
+    .channel-desc { font-size: 14px; color: var(--text-muted); }
+    .simple-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .simple-stat:last-child { border-bottom: none; }
+    .stat-label { font-size: 14px; color: var(--text-muted); }
+    .stat-value { font-size: 18px; font-weight: 600; }
+    .vs-badge {
+      background: #1E293B;
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    .winner-badge {
+      background: var(--secondary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .trait-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .trait-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .trait-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    .trait-icon.good { background: rgba(16, 185, 129, 0.1); color: var(--secondary); }
+    .trait-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>Creative Outdoor</h1>
+        <span>Marketing Dashboard</span>
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Views</div>
+        <a href="index.html" class="nav-link">
+          <i class="fas fa-home"></i>
+          Overview
+        </a>
+        <a href="locations.html" class="nav-link">
+          <i class="fas fa-map-marker-alt"></i>
+          By Location
+        </a>
+        <a href="services.html" class="nav-link">
+          <i class="fas fa-tools"></i>
+          By Service
+        </a>
+        <a href="channels.html" class="nav-link active">
+          <i class="fas fa-bullhorn"></i>
+          By Channel
+        </a>
+        <a href="analysis.html" class="nav-link">
+          <i class="fas fa-filter"></i>
+          Analysis
+        </a>
+      </nav>
+
+      <nav class="nav-section">
+        <div class="nav-section-title">Planning</div>
+        <a href="optimizer.html" class="nav-link">
+          <i class="fas fa-sliders-h"></i>
+          2026 Planner
+        </a>
+      </nav>
+
+      <div class="ai-status">
+        <div class="ai-status-header">
+          <div class="ai-status-dot"></div>
+          <span class="ai-status-title">Connected</span>
+        </div>
+        <div class="ai-status-text">Data syncs daily</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Channel Comparison</h1>
+          <p class="page-subtitle">SEO vs Paid Ads - Which delivers more value?</p>
+        </div>
+        <div class="last-updated">
+          <div class="live-dot"></div>
+          Monthly data
+        </div>
+      </div>
+
+      <!-- Summary Stats -->
+      <div class="grid-4" style="margin-bottom: 24px;">
+        <div class="metric-box">
+          <div class="big-number highlight-blue">2</div>
+          <div class="big-label">Marketing Channels</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number" id="totalSpend">$25K</div>
+          <div class="big-label">Monthly Spend</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number highlight-green" id="totalRevenue">$292K</div>
+          <div class="big-label">Monthly Revenue</div>
+        </div>
+        <div class="metric-box">
+          <div class="big-number highlight-green" id="avgROAS">$11.67</div>
+          <div class="big-label">Avg. Return per $1</div>
+        </div>
+      </div>
+
+      <!-- Side by Side Comparison -->
+      <div class="grid-2" style="margin-bottom: 24px; position: relative;">
+        <!-- SEO Channel -->
+        <div class="channel-box seo">
+          <div class="channel-header">
+            <div class="channel-icon seo">
+              <i class="fas fa-search"></i>
+            </div>
+            <div>
+              <div class="channel-name">SEO</div>
+              <div class="channel-desc">Organic Search Marketing</div>
+            </div>
+            <span class="winner-badge" style="margin-left: auto;">Lower CAC</span>
+          </div>
+
+          <div id="seoStats"></div>
+
+          <ul class="trait-list">
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Lower cost per customer
+            </li>
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Compounding returns over time
+            </li>
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Builds long-term trust
+            </li>
+            <li>
+              <span class="trait-icon warning"><i class="fas fa-clock"></i></span>
+              60-90 days to see results
+            </li>
+          </ul>
+        </div>
+
+        <!-- VS Badge -->
+        <div class="vs-badge">VS</div>
+
+        <!-- Paid Ads Channel -->
+        <div class="channel-box paid">
+          <div class="channel-header">
+            <div class="channel-icon paid">
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <div>
+              <div class="channel-name">Paid Ads</div>
+              <div class="channel-desc">PPC & Social Advertising</div>
+            </div>
+            <span class="winner-badge" style="margin-left: auto; background: var(--warning);">More Leads</span>
+          </div>
+
+          <div id="paidStats"></div>
+
+          <ul class="trait-list">
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Immediate results
+            </li>
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Precise targeting options
+            </li>
+            <li>
+              <span class="trait-icon good"><i class="fas fa-check"></i></span>
+              Easy to scale quickly
+            </li>
+            <li>
+              <span class="trait-icon warning"><i class="fas fa-exclamation"></i></span>
+              Stops when budget stops
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Comparison Charts -->
+      <div class="grid-2" style="margin-bottom: 24px;">
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-dollar-sign" style="color: var(--secondary);"></i>
+            Revenue Comparison
+          </div>
+          <div class="chart-container" style="height: 150px;">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">
+            <i class="fas fa-user-plus" style="color: var(--primary);"></i>
+            Customer Acquisition Cost
+          </div>
+          <div class="chart-container" style="height: 150px;">
+            <canvas id="cacChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROAS Comparison -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="section-title">
+          <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+          Return on Ad Spend (ROAS)
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          How many dollars you get back for every $1 spent
+        </p>
+        <div class="chart-container" style="height: 150px;">
+          <canvas id="roasChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="card" style="border-left: 4px solid var(--primary);">
+        <div class="section-title">
+          <i class="fas fa-lightbulb" style="color: var(--warning);"></i>
+          Summary
+        </div>
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px; color: var(--text);" id="recommendation"></p>
+        <div style="display: flex; gap: 16px;">
+          <a href="optimizer.html" style="background: var(--primary); color: white; padding: 10px 20px; border-radius: 6px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 14px;">
+            <i class="fas fa-sliders-h"></i>
+            Plan 2026 Budget
+          </a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script>
+    Chart.register(ChartDataLabels);
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.plugins.legend.display = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      renderSummary();
+      renderChannelStats();
+      renderRevenueChart();
+      renderCACChart();
+      renderROASChart();
+      renderRecommendation();
+    });
+
+    function renderSummary() {
+      const totalSpend = channels.reduce((sum, c) => sum + c.spend, 0);
+      const totalRevenue = channels.reduce((sum, c) => sum + c.revenue, 0);
+      document.getElementById('totalSpend').textContent = formatCurrency(totalSpend);
+      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('avgROAS').textContent = formatROAS(companyData.roas);
+    }
+
+    function renderChannelStats() {
+      const seo = channels[0];
+      const paid = channels[1];
+
+      document.getElementById('seoStats').innerHTML = `
+        <div class="simple-stat">
+          <span class="stat-label">Monthly Spend</span>
+          <span class="stat-value">${formatCurrency(seo.spend)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Revenue Generated</span>
+          <span class="stat-value highlight-green">${formatCurrency(seo.revenue)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Return per $1</span>
+          <span class="stat-value highlight-green">${formatROAS(seo.roas)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Cost per Customer</span>
+          <span class="stat-value highlight-green">${formatCAC(seo.cac)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Customers/Month</span>
+          <span class="stat-value">${seo.customers}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Leads/Month</span>
+          <span class="stat-value">${seo.leads}</span>
+        </div>
+      `;
+
+      document.getElementById('paidStats').innerHTML = `
+        <div class="simple-stat">
+          <span class="stat-label">Monthly Spend</span>
+          <span class="stat-value">${formatCurrency(paid.spend)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Revenue Generated</span>
+          <span class="stat-value highlight-green">${formatCurrency(paid.revenue)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Return per $1</span>
+          <span class="stat-value ${paid.roas < seo.roas ? 'highlight-orange' : 'highlight-green'}">${formatROAS(paid.roas)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Cost per Customer</span>
+          <span class="stat-value ${paid.cac > seo.cac ? 'highlight-orange' : ''}">${formatCAC(paid.cac)}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Customers/Month</span>
+          <span class="stat-value">${paid.customers}</span>
+        </div>
+        <div class="simple-stat">
+          <span class="stat-label">Leads/Month</span>
+          <span class="stat-value">${paid.leads}</span>
+        </div>
+      `;
+    }
+
+    function renderRevenueChart() {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: channels.map(c => c.name),
+          datasets: [{
+            data: channels.map(c => c.revenue),
+            backgroundColor: ['#2563EB', '#F59E0B'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => formatCurrency(value) + '/month',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...channels.map(c => c.revenue)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCACChart() {
+      const ctx = document.getElementById('cacChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: channels.map(c => c.name),
+          datasets: [{
+            data: channels.map(c => c.cac),
+            backgroundColor: ['#10B981', '#EF4444'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => formatCAC(value) + ' per customer',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...channels.map(c => c.cac)) * 1.5
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderROASChart() {
+      const ctx = document.getElementById('roasChart').getContext('2d');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: channels.map(c => c.name),
+          datasets: [{
+            data: channels.map(c => c.roas),
+            backgroundColor: ['#2563EB', '#F59E0B'],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: {
+              formatter: (value) => '$' + value.toFixed(2) + ' return per $1 spent',
+              color: '#1E293B',
+              anchor: 'end',
+              align: 'right',
+              offset: 4,
+              font: { weight: 'bold', size: 12 }
+            }
+          },
+          scales: {
+            x: {
+              display: false,
+              max: Math.max(...channels.map(c => c.roas)) * 1.4
+            },
+            y: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRecommendation() {
+      const seo = channels[0];
+      const paid = channels[1];
+      const cacDiff = ((paid.cac - seo.cac) / seo.cac * 100).toFixed(0);
+
+      document.getElementById('recommendation').innerHTML = `
+        <strong>Current split:</strong> ${((seo.spend / (seo.spend + paid.spend)) * 100).toFixed(0)}% SEO / ${((paid.spend / (seo.spend + paid.spend)) * 100).toFixed(0)}% Paid Ads<br><br>
+        SEO delivers <strong>${cacDiff}% lower cost per customer</strong> (${formatCAC(seo.cac)} vs ${formatCAC(paid.cac)}), while Paid Ads generates <strong>more leads</strong> (${paid.leads} vs ${seo.leads}/month).
+        <br><br>
+        <strong>Recommendation:</strong> Maintain a balanced 40/60 split. SEO builds long-term value while Paid Ads fills immediate pipeline needs.
+      `;
+    }
+  </script>
+</body>
+</html>
