@@ -348,20 +348,36 @@
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      height: 150px;
-      padding-top: 20px;
+      height: 180px;
+      padding-top: 30px;
+      gap: 4px;
     }
     .month-bar-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       flex: 1;
+      height: 100%;
+      justify-content: flex-end;
     }
     .month-bar {
-      width: 24px;
+      width: 100%;
+      max-width: 32px;
       border-radius: 4px 4px 0 0;
       transition: height 0.3s;
       position: relative;
+      min-height: 20px;
+    }
+    .month-bar::before {
+      content: attr(data-value);
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
     }
     .month-bar.peak { background: linear-gradient(180deg, #10B981 0%, #34D399 100%); }
     .month-bar.normal { background: linear-gradient(180deg, #2563EB 0%, #3B82F6 100%); }
@@ -370,7 +386,7 @@
       font-size: 10px;
       color: var(--text-muted);
       margin-top: 8px;
-      font-weight: 500;
+      font-weight: 600;
     }
     .seasonality-insights {
       display: flex;
@@ -856,7 +872,17 @@
           maintainAspectRatio: false,
           plugins: {
             datalabels: {
-              display: false
+              display: true,
+              anchor: 'end',
+              align: 'top',
+              offset: -2,
+              font: { size: 9, weight: '600' },
+              color: function(context) {
+                return context.datasetIndex === 1 ? '#059669' : '#64748B';
+              },
+              formatter: function(value) {
+                return formatCurrency(value);
+              }
             },
             tooltip: {
               callbacks: {
@@ -872,6 +898,7 @@
             },
             y: {
               beginAtZero: true,
+              max: Math.max(...data2026) * 1.2,
               ticks: {
                 callback: function(value) {
                   return formatCurrency(value);
@@ -887,6 +914,7 @@
       const data2025 = monthlyDataByYear[2025].map(m => m.revenue);
       const data2026 = data2025.map(v => v * (1 + rate / 100));
       forecastChart.data.datasets[1].data = data2026;
+      forecastChart.options.scales.y.max = Math.max(...data2026) * 1.2;
       forecastChart.update();
     }
 
@@ -894,16 +922,21 @@
       const data = monthlyDataByYear[2025];
       const avgRevenue = data.reduce((sum, m) => sum + m.revenue, 0) / 12;
       const maxRevenue = Math.max(...data.map(m => m.revenue));
+      const minRevenue = Math.min(...data.map(m => m.revenue));
 
       document.getElementById('seasonalityBars').innerHTML = data.map(m => {
-        const heightPct = (m.revenue / maxRevenue) * 100;
+        // Scale height between 20% and 100%
+        const range = maxRevenue - minRevenue;
+        const normalized = (m.revenue - minRevenue) / range;
+        const heightPct = 20 + (normalized * 80);
+
         let barClass = 'normal';
         if (m.revenue > avgRevenue * 1.15) barClass = 'peak';
         else if (m.revenue < avgRevenue * 0.9) barClass = 'slow';
 
         return `
           <div class="month-bar-container">
-            <div class="month-bar ${barClass}" style="height: ${heightPct}%;"></div>
+            <div class="month-bar ${barClass}" style="height: ${heightPct}%;" data-value="${formatCurrency(m.revenue)}"></div>
             <div class="month-label">${m.month}</div>
           </div>
         `;
