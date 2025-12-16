@@ -264,7 +264,7 @@
       <!-- Header -->
       <div class="page-header">
         <div>
-          <h1 class="page-title">Where Should You Spend Your Next Dollar?</h1>
+          <h1 class="page-title" id="headerTitle">Where Should You Spend Your Next Dollar?</h1>
           <p class="page-subtitle" id="headerSubtitle">Based on your 2025 performance data</p>
         </div>
         <div class="last-updated">
@@ -509,9 +509,29 @@
                         `${startName} - ${endName} (${monthCount} months)`;
       document.getElementById('filterSummary').textContent = summaryText;
 
-      // Update header subtitle
-      document.getElementById('headerSubtitle').textContent =
-        `Based on your ${currentFilters.year} ${totals.isProjected ? 'projected' : 'performance'} data`;
+      // Build period label for header
+      let periodLabel = '';
+      if (monthCount === 12) {
+        periodLabel = `${currentFilters.year}`;
+      } else if (monthCount === 1) {
+        periodLabel = `${startName} ${currentFilters.year}`;
+      } else if (monthCount === 3) {
+        const quarter = currentFilters.startMonth <= 3 ? 'Q1' :
+                       currentFilters.startMonth <= 6 ? 'Q2' :
+                       currentFilters.startMonth <= 9 ? 'Q3' : 'Q4';
+        periodLabel = `${quarter} ${currentFilters.year}`;
+      } else {
+        periodLabel = `${startName}-${endName} ${currentFilters.year}`;
+      }
+
+      // Update header title and subtitle based on year
+      if (currentFilters.year === 2026) {
+        document.getElementById('headerTitle').textContent = `Planning Your ${periodLabel} Budget`;
+        document.getElementById('headerSubtitle').textContent = `Projected performance based on 2025 trends`;
+      } else {
+        document.getElementById('headerTitle').textContent = `Your ${periodLabel} Performance`;
+        document.getElementById('headerSubtitle').textContent = `Revenue: ${formatCurrency(totals.revenue)} | Spend: ${formatCurrency(totals.spend)} | ROAS: ${formatROAS(totals.roas)}`;
+      }
 
       // Show/hide projected badge
       document.getElementById('projectedBadge').style.display = totals.isProjected ? 'inline-flex' : 'none';
