@@ -154,22 +154,79 @@ Object.keys(historicalData).forEach(year => {
 });
 
 // ==========================================
-// MONTHLY TREND (2025)
+// MONTHLY DATA BY YEAR
 // ==========================================
-const monthlyTrend = [
-  { month: "Jan",  spend: 22000, revenue: 260000, customers: 45 },
-  { month: "Feb",  spend: 23000, revenue: 275000, customers: 47 },
-  { month: "Mar",  spend: 25000, revenue: 310000, customers: 52 },
-  { month: "Apr",  spend: 26000, revenue: 320000, customers: 55 },
-  { month: "May",  spend: 28000, revenue: 340000, customers: 58 },
-  { month: "Jun",  spend: 28000, revenue: 350000, customers: 60 },
-  { month: "Jul",  spend: 27000, revenue: 330000, customers: 55 },
-  { month: "Aug",  spend: 26000, revenue: 300000, customers: 52 },
-  { month: "Sep",  spend: 25000, revenue: 280000, customers: 48 },
-  { month: "Oct",  spend: 24000, revenue: 270000, customers: 46 },
-  { month: "Nov",  spend: 23000, revenue: 260000, customers: 44 },
-  { month: "Dec",  spend: 23000, revenue: 205000, customers: 38 }
-];
+const monthlyDataByYear = {
+  2024: [
+    { month: "Jan", monthNum: 1, spend: 20000, revenue: 230000, customers: 40, leads: 160 },
+    { month: "Feb", monthNum: 2, spend: 21000, revenue: 245000, customers: 42, leads: 168 },
+    { month: "Mar", monthNum: 3, spend: 22000, revenue: 280000, customers: 48, leads: 192 },
+    { month: "Apr", monthNum: 4, spend: 23000, revenue: 290000, customers: 50, leads: 200 },
+    { month: "May", monthNum: 5, spend: 25000, revenue: 310000, customers: 53, leads: 212 },
+    { month: "Jun", monthNum: 6, spend: 25000, revenue: 320000, customers: 55, leads: 220 },
+    { month: "Jul", monthNum: 7, spend: 24000, revenue: 300000, customers: 52, leads: 208 },
+    { month: "Aug", monthNum: 8, spend: 23000, revenue: 280000, customers: 48, leads: 192 },
+    { month: "Sep", monthNum: 9, spend: 22000, revenue: 260000, customers: 45, leads: 180 },
+    { month: "Oct", monthNum: 10, spend: 22000, revenue: 250000, customers: 43, leads: 172 },
+    { month: "Nov", monthNum: 11, spend: 21000, revenue: 240000, customers: 41, leads: 164 },
+    { month: "Dec", monthNum: 12, spend: 22000, revenue: 195000, customers: 35, leads: 140 }
+  ],
+  2025: [
+    { month: "Jan", monthNum: 1, spend: 22000, revenue: 260000, customers: 45, leads: 180 },
+    { month: "Feb", monthNum: 2, spend: 23000, revenue: 275000, customers: 47, leads: 188 },
+    { month: "Mar", monthNum: 3, spend: 25000, revenue: 310000, customers: 52, leads: 208 },
+    { month: "Apr", monthNum: 4, spend: 26000, revenue: 320000, customers: 55, leads: 220 },
+    { month: "May", monthNum: 5, spend: 28000, revenue: 340000, customers: 58, leads: 232 },
+    { month: "Jun", monthNum: 6, spend: 28000, revenue: 350000, customers: 60, leads: 240 },
+    { month: "Jul", monthNum: 7, spend: 27000, revenue: 330000, customers: 55, leads: 220 },
+    { month: "Aug", monthNum: 8, spend: 26000, revenue: 300000, customers: 52, leads: 208 },
+    { month: "Sep", monthNum: 9, spend: 25000, revenue: 280000, customers: 48, leads: 192 },
+    { month: "Oct", monthNum: 10, spend: 24000, revenue: 270000, customers: 46, leads: 184 },
+    { month: "Nov", monthNum: 11, spend: 23000, revenue: 260000, customers: 44, leads: 176 },
+    { month: "Dec", monthNum: 12, spend: 23000, revenue: 205000, customers: 38, leads: 152 }
+  ],
+  2026: [
+    { month: "Jan", monthNum: 1, spend: 24000, revenue: 285000, customers: 48, leads: 192, projected: true },
+    { month: "Feb", monthNum: 2, spend: 25000, revenue: 300000, customers: 50, leads: 200, projected: true },
+    { month: "Mar", monthNum: 3, spend: 27000, revenue: 340000, customers: 56, leads: 224, projected: true },
+    { month: "Apr", monthNum: 4, spend: 28000, revenue: 350000, customers: 58, leads: 232, projected: true },
+    { month: "May", monthNum: 5, spend: 30000, revenue: 370000, customers: 62, leads: 248, projected: true },
+    { month: "Jun", monthNum: 6, spend: 30000, revenue: 380000, customers: 64, leads: 256, projected: true },
+    { month: "Jul", monthNum: 7, spend: 29000, revenue: 360000, customers: 60, leads: 240, projected: true },
+    { month: "Aug", monthNum: 8, spend: 28000, revenue: 330000, customers: 55, leads: 220, projected: true },
+    { month: "Sep", monthNum: 9, spend: 27000, revenue: 310000, customers: 52, leads: 208, projected: true },
+    { month: "Oct", monthNum: 10, spend: 26000, revenue: 295000, customers: 49, leads: 196, projected: true },
+    { month: "Nov", monthNum: 11, spend: 25000, revenue: 285000, customers: 47, leads: 188, projected: true },
+    { month: "Dec", monthNum: 12, spend: 25000, revenue: 225000, customers: 40, leads: 160, projected: true }
+  ]
+};
+
+// Legacy support - monthlyTrend points to 2025 data
+const monthlyTrend = monthlyDataByYear[2025];
+
+// Get filtered data by date range
+function getFilteredData(year, startMonth = 1, endMonth = 12) {
+  const yearData = monthlyDataByYear[year] || monthlyDataByYear[2025];
+  return yearData.filter(m => m.monthNum >= startMonth && m.monthNum <= endMonth);
+}
+
+// Calculate totals for filtered data
+function getFilteredTotals(year, startMonth = 1, endMonth = 12) {
+  const filtered = getFilteredData(year, startMonth, endMonth);
+  const totals = filtered.reduce((acc, m) => ({
+    revenue: acc.revenue + m.revenue,
+    spend: acc.spend + m.spend,
+    customers: acc.customers + m.customers,
+    leads: acc.leads + m.leads
+  }), { revenue: 0, spend: 0, customers: 0, leads: 0 });
+
+  totals.roas = totals.spend > 0 ? totals.revenue / totals.spend : 0;
+  totals.cac = totals.customers > 0 ? totals.spend / totals.customers : 0;
+  totals.isProjected = filtered.some(m => m.projected);
+  totals.monthCount = filtered.length;
+
+  return totals;
+}
 
 // ==========================================
 // WEEKLY INSIGHTS (Monday Reports)
@@ -315,3 +372,6 @@ window.getLocationsByCAC = getLocationsByCAC;
 window.getServicesByROAS = getServicesByROAS;
 window.getCurrentWeekInsights = getCurrentWeekInsights;
 window.getYoYChanges = getYoYChanges;
+window.monthlyDataByYear = monthlyDataByYear;
+window.getFilteredData = getFilteredData;
+window.getFilteredTotals = getFilteredTotals;
